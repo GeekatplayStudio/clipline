@@ -12,6 +12,8 @@ export type LineOfBusiness =
   | 'Mexico'
   | 'Corporate';
 
+export type LOB = LineOfBusiness;
+
 // Justification: Standardized tool ecosystem choices including native LLMs, automation platforms, and enterprise suites.
 export type ToolName =
   | 'ChatGPT / OpenAI'

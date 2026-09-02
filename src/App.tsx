@@ -37,6 +37,9 @@ import { ExportReportModal } from './components/reports/ExportReportModal.js';
 import { CertificationReadinessPage } from './components/readiness/CertificationReadinessPage.js';
 // Justification: Executive certification and regulatory readiness cockpit benchmarking ISO 42001, NIST RMF, EU AI Act, and CFPB.
 
+import { ToolRequestsPage } from './components/tools/ToolRequestsPage.js';
+// Justification: Employee AI tool intake catalog, vendor safety analysis, and certification audit cockpit.
+
 export const App: React.FC = () => {
   // Justification: Role state initialized from reactive store.
   const [currentRole, setCurrentRole] = useState<UserRole>(workflowStore.getCurrentRole());
@@ -177,7 +180,12 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 4. Standards & Certifications */}
+        {/* 4. AI Tool Intake & Safety Analysis */}
+        {activeView === 'tools' && (
+          <ToolRequestsPage currentRole={currentRole} />
+        )}
+
+        {/* 5. Standards & Certifications */}
         {activeView === 'readiness' && (
           <CertificationReadinessPage
             onOpenExport={() => setShowExportModal(true)}

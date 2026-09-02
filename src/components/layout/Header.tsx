@@ -7,10 +7,10 @@ import React from 'react';
 import { UserRole } from '../../types/workflow.js';
 // Justification: UserRole enum for role switcher state.
 
-import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Download, Award } from 'lucide-react';
+import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Download, Award, Cpu } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
-export type AppView = 'network3d' | 'dashboard' | 'registry' | 'readiness' | 'register' | 'quiz';
+export type AppView = 'network3d' | 'dashboard' | 'registry' | 'tools' | 'readiness' | 'register' | 'quiz';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -142,7 +142,20 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Registry Inventory</span>
         </button>
 
-        {/* 4. Standards & Certifications */}
+        {/* 4. AI Tool Requests & Safety Analysis */}
+        <button
+          onClick={() => onViewChange('tools')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'tools'
+              ? 'border-blue-600 text-blue-600 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Cpu className="w-3.5 h-3.5" />
+          <span>AI Tool Requests & Safety</span>
+        </button>
+
+        {/* 5. Standards & Certifications */}
         <button
           onClick={() => onViewChange('readiness')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
