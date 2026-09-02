@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing and Coverage
+coverage/
+reports/
+.stryker-tmp/
+
+# Production Build Artifacts
+dist/
+dist-ssr/
+*.local
+
+# TypeScript Cache
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Editor & OS Files
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment Variables
+.env
+.env.*
+!.env.example

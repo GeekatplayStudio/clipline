@@ -1,0 +1,42 @@
+{
+  // Justification: TypeScript root compiler options enforcing strict safety and React 19 JSX handling.
+  "compilerOptions": {
+    // Justification: Target modern ECMAScript 2022 to take advantage of native async and array methods.
+    "target": "ES2022",
+    // Justification: Use ECMAScript Next library features for DOM and modern JS runtimes.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Justification: Generate ES modules compatible with Vite bundler.
+    "module": "ESNext",
+    // Justification: Skip type checking of declaration files to reduce build overhead.
+    "skipLibCheck": true,
+
+    // Justification: Bundler mode resolution allows importing modern packages cleanly.
+    "moduleResolution": "bundler",
+    // Justification: Allow importing JSON configuration and seed files directly.
+    "resolveJsonModule": true,
+    // Justification: Ensure each file can be transpiled independently without multi-file type info.
+    "isolatedModules": true,
+    // Justification: Vite handles the actual emission of JavaScript files; TS only checks types.
+    "noEmit": true,
+    // Justification: Uses modern React 19 JSX transform without requiring manual React import in every file.
+    "jsx": "react-jsx",
+
+    // Justification: Enable all strict type-checking options to eliminate null pointers and implicit anys.
+    "strict": true,
+    // Justification: Disallow unused local variables to keep code clean and prevent bugs.
+    "noUnusedLocals": true,
+    // Justification: Disallow unused parameters to ensure signatures accurately reflect usage.
+    "noUnusedParameters": true,
+    // Justification: Disallow fallthrough cases in switch statements.
+    "noFallthroughCasesInSwitch": true,
+
+    // Justification: Path mapping matching the vite.config.ts alias for root src imports.
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  // Justification: Include all source files, agent orchestration files, and test files.
+  "include": ["src", "agents", "tests", "vite.config.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

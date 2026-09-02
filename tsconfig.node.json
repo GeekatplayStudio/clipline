@@ -1,0 +1,19 @@
+{
+  // Justification: TypeScript configuration for Node environment files (vite configs, build scripts).
+  "compilerOptions": {
+    // Justification: Composite project support for project references.
+    "composite": true,
+    // Justification: Skip checking external type declarations to accelerate builds.
+    "skipLibCheck": true,
+    // Justification: Target modern Node.js 20+ runtime features.
+    "module": "ESNext",
+    // Justification: Bundler module resolution strategy.
+    "moduleResolution": "bundler",
+    // Justification: Allow synthetic default imports for compatibility with Node modules.
+    "allowSyntheticDefaultImports": true,
+    // Justification: Strict type checking for all infrastructure scripts.
+    "strict": true
+  },
+  // Justification: Target Vite config files.
+  "include": ["vite.config.ts"]
+}

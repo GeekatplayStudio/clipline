@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/api/schema/stryker-schema.json",
+  "_comment": "Justification: Stryker mutation testing configuration targeting core risk classification engine to verify test suite fault-detection capabilities.",
+  "packageManager": "npm",
+  "reporters": ["html", "clear-text", "progress"],
+  "testRunner": "vitest",
+  "testRunner_comment": "Justification: Integrates directly with our Vitest test suite for fast in-memory execution.",
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/engine/risk_engine.ts"
+  ],
+  "mutate_comment": "Justification: Focuses mutation testing on the core risk derivation cascade where logic errors carry critical compliance risk.",
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 75
+  }
+}
