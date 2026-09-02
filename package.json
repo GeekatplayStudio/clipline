@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:mutation": "stryker run",
-    "agents:run": "tsx agents/run_pipeline.ts"
+    "agents:run": "tsx agents/run_pipeline.ts",
+    "deploy:hostinger": "tsx scripts/deploy_hostinger.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
