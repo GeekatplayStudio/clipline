@@ -7,10 +7,10 @@ import React from 'react';
 import { UserRole } from '../../types/workflow.js';
 // Justification: UserRole enum for role switcher state.
 
-import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Split, Download } from 'lucide-react';
+import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Split, Download, Award } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
-export type AppView = 'registry' | 'register' | 'dashboard' | 'quiz' | 'network3d' | 'split';
+export type AppView = 'registry' | 'register' | 'dashboard' | 'quiz' | 'network3d' | 'split' | 'readiness';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -137,6 +137,18 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <BarChart3 className="w-3.5 h-3.5" />
           <span>Executive Cockpit</span>
+        </button>
+
+        <button
+          onClick={() => onViewChange('readiness')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'readiness'
+              ? 'border-blue-600 text-blue-600 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Award className="w-3.5 h-3.5" />
+          <span>Certifications & Readiness</span>
         </button>
 
         <button

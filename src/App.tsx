@@ -34,6 +34,9 @@ import { RiskNetwork3D } from './components/network3d/RiskNetwork3D.js';
 import { ExportReportModal } from './components/reports/ExportReportModal.js';
 // Justification: Executive governance export modal for Printable PDF, ServiceNow CSV, and JSON audit manifests.
 
+import { CertificationReadinessPage } from './components/readiness/CertificationReadinessPage.js';
+// Justification: Executive certification and regulatory readiness cockpit benchmarking ISO 42001, NIST RMF, EU AI Act, and CFPB.
+
 export const App: React.FC = () => {
   // Justification: Role state initialized from reactive store.
   const [currentRole, setCurrentRole] = useState<UserRole>(workflowStore.getCurrentRole());
@@ -208,7 +211,14 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* 5. 4-Step Progressive Intake Wizard */}
+        {/* 5. Certification & Regulatory Readiness */}
+        {activeView === 'readiness' && (
+          <CertificationReadinessPage
+            onOpenExport={() => setShowExportModal(true)}
+          />
+        )}
+
+        {/* 6. 4-Step Progressive Intake Wizard */}
         {activeView === 'register' && (
           <IntakeWizard
             onWorkflowCreated={handleWorkflowCreated}
@@ -216,7 +226,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 6. Acceptable Use Companion Knowledge Check */}
+        {/* 7. Acceptable Use Companion Knowledge Check */}
         {activeView === 'quiz' && (
           <KnowledgeCheck
             onComplete={() => {
