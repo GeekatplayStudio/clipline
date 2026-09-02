@@ -1,7 +1,7 @@
 // src/components/registry/RegistryTable.tsx
 // Justification: High-density ServiceNow-style table view implementing PRD Section 5.2 with multi-dimensional filtering.
 
-import React from 'react';
+import React, { useState } from 'react';
 // Justification: React framework import.
 
 import {
@@ -23,8 +23,13 @@ import {
   GraduationCap,
   ChevronRight,
   RefreshCw,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  Download,
 } from 'lucide-react';
-// Justification: Icons for enterprise visual indicators.
+// Justification: Icons for enterprise visual indicators and sorting.
 
 interface RegistryTableProps {
   workflows: Workflow[];
@@ -32,6 +37,7 @@ interface RegistryTableProps {
   onFilterChange: (updates: Partial<WorkflowFilters>) => void;
   onResetFilters: () => void;
   onSelectWorkflow: (workflow: Workflow) => void;
+  onOpenExport?: () => void;
   currentRole: UserRole;
 }
 
@@ -48,21 +54,87 @@ const STATUSES: (WorkflowStatus | 'All')[] = [
   'Retired',
 ];
 
+type SortField = 'id' | 'title' | 'owner' | 'lob' | 'tier' | 'status' | 'review_due';
+
 export const RegistryTable: React.FC<RegistryTableProps> = ({
   workflows,
   filters,
   onFilterChange,
   onResetFilters,
   onSelectWorkflow,
+  onOpenExport,
   currentRole,
 }) => {
   const today = new Date().toISOString().split('T')[0];
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('id');
+  const [sortAsc, setSortAsc] = useState(true);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortField(field);
+      setSortAsc(true);
+    }
+  };
+
+  // Filter by search term and sort
+  const displayedWorkflows = React.useMemo(() => {
+    let list = workflows;
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter(
+        (w) =>
+          w.id.toLowerCase().includes(q) ||
+          w.title.toLowerCase().includes(q) ||
+          w.owner_name.toLowerCase().includes(q) ||
+          w.lob.toLowerCase().includes(q) ||
+          w.department.toLowerCase().includes(q)
+      );
+    }
+
+    return [...list].sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'id') comparison = a.id.localeCompare(b.id);
+      else if (sortField === 'title') comparison = a.title.localeCompare(b.title);
+      else if (sortField === 'owner') comparison = a.owner_name.localeCompare(b.owner_name);
+      else if (sortField === 'lob') comparison = a.lob.localeCompare(b.lob);
+      else if (sortField === 'tier') comparison = a.risk_tier.localeCompare(b.risk_tier);
+      else if (sortField === 'status') comparison = a.status.localeCompare(b.status);
+      else if (sortField === 'review_due') comparison = a.review_due.localeCompare(b.review_due);
+      return sortAsc ? comparison : -comparison;
+    });
+  }, [workflows, searchTerm, sortField, sortAsc]);
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-60 group-hover:opacity-100 inline ml-1" />;
+    }
+    return sortAsc ? (
+      <ArrowUp className="w-3 h-3 text-blue-600 inline ml-1" />
+    ) : (
+      <ArrowDown className="w-3 h-3 text-blue-600 inline ml-1" />
+    );
+  };
 
   return (
     <div className="space-y-3">
       {/* Justification: Filter bar with multi-criteria dropdowns and toggles */}
       <div className="bg-white border border-slate-200 rounded p-3 text-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Live Search */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search workflows, owners, LOBs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 pr-3 py-1 bg-slate-50 border border-slate-300 rounded text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-52 sm:w-64"
+            />
+          </div>
+
           <div className="flex items-center space-x-1 text-slate-500 font-medium">
             <Filter className="w-3.5 h-3.5" />
             <span>Filters:</span>
@@ -141,47 +213,79 @@ export const RegistryTable: React.FC<RegistryTableProps> = ({
           </label>
         </div>
 
-        <button
-          onClick={onResetFilters}
-          className="text-xs text-slate-500 hover:text-slate-800 flex items-center space-x-1 underline"
-        >
-          <RefreshCw className="w-3 h-3" />
-          <span>Clear Filters</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onOpenExport && (
+            <button
+              type="button"
+              onClick={onOpenExport}
+              className="px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Report</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              onResetFilters();
+            }}
+            className="text-xs text-slate-500 hover:text-slate-800 flex items-center space-x-1 underline cursor-pointer"
+          >
+            <RefreshCw className="w-3 h-3" />
+            <span>Clear</span>
+          </button>
+        </div>
       </div>
 
       {/* Justification: PRD Section 5.2: Dense Enterprise Table Layout */}
       <div className="bg-white border border-slate-200 rounded overflow-x-auto shadow-sm">
         <table className="w-full text-left border-collapse font-sans text-xs">
           <thead>
-            <tr className="bg-slate-100 border-b border-slate-300 text-slate-600 uppercase tracking-wider text-[11px] font-semibold">
-              <th className="px-3 py-2 w-24">ID</th>
-              <th className="px-3 py-2">Workflow Title</th>
-              <th className="px-3 py-2 w-36">Owner</th>
-              <th className="px-3 py-2 w-32">LOB</th>
-              <th className="px-3 py-2 w-32">Derived Tier</th>
-              <th className="px-3 py-2 w-28">Status</th>
-              <th className="px-3 py-2 w-28">Review Due</th>
+            <tr className="bg-slate-100 border-b border-slate-300 text-slate-600 uppercase tracking-wider text-[11px] font-semibold select-none">
+              <th onClick={() => handleSort('id')} className="px-3 py-2 w-24 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>ID</span> {renderSortIcon('id')}
+              </th>
+              <th onClick={() => handleSort('title')} className="px-3 py-2 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>Workflow Title</span> {renderSortIcon('title')}
+              </th>
+              <th onClick={() => handleSort('owner')} className="px-3 py-2 w-36 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>Owner</span> {renderSortIcon('owner')}
+              </th>
+              <th onClick={() => handleSort('lob')} className="px-3 py-2 w-32 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>LOB</span> {renderSortIcon('lob')}
+              </th>
+              <th onClick={() => handleSort('tier')} className="px-3 py-2 w-32 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>Derived Tier</span> {renderSortIcon('tier')}
+              </th>
+              <th onClick={() => handleSort('status')} className="px-3 py-2 w-28 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>Status</span> {renderSortIcon('status')}
+              </th>
+              <th onClick={() => handleSort('review_due')} className="px-3 py-2 w-28 cursor-pointer hover:bg-slate-200/70 transition-colors group">
+                <span>Review Due</span> {renderSortIcon('review_due')}
+              </th>
               <th className="px-2 py-2 w-8"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {workflows.length === 0 ? (
+            {displayedWorkflows.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-10 text-center text-slate-500">
                   <AlertCircle className="w-6 h-6 mx-auto mb-2 text-slate-400" />
                   <p className="font-medium text-slate-700">
-                    {filters.lob !== 'All'
-                      ? `No workflows registered for ${filters.lob} yet. That's either good news or a discovery problem.`
+                    {searchTerm
+                      ? `No workflows match "${searchTerm}".`
+                      : filters.lob !== 'All'
+                      ? `No workflows registered for ${filters.lob} yet.`
                       : 'No workflows match the active filter criteria.'}
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    Try adjusting your filters or register a new workflow.
+                    Try adjusting your search or filters.
                   </p>
                 </td>
               </tr>
             ) : (
-              workflows.map((w) => {
+              displayedWorkflows.map((w) => {
                 const isOverdue = w.review_due < today && w.status !== 'Retired';
                 const trainingMissing = !w.training_current;
 

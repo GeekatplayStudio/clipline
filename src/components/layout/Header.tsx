@@ -7,15 +7,18 @@ import React from 'react';
 import { UserRole } from '../../types/workflow.js';
 // Justification: UserRole enum for role switcher state.
 
-import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3 } from 'lucide-react';
+import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Split, Download } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
+
+export type AppView = 'registry' | 'register' | 'dashboard' | 'quiz' | 'network3d' | 'split';
 
 interface HeaderProps {
   currentRole: UserRole;
   onRoleChange: (role: UserRole) => void;
-  activeView: 'registry' | 'register' | 'dashboard' | 'quiz';
-  onViewChange: (view: 'registry' | 'register' | 'dashboard' | 'quiz') => void;
+  activeView: AppView;
+  onViewChange: (view: AppView) => void;
   onResetData: () => void;
+  onOpenExport?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -24,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeView,
   onViewChange,
   onResetData,
+  onOpenExport,
 }) => {
   return (
     <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -74,10 +78,22 @@ export const Header: React.FC<HeaderProps> = ({
             </select>
           </div>
 
+          {onOpenExport && (
+            <button
+              type="button"
+              onClick={onOpenExport}
+              title="Export Executive Governance Briefing"
+              className="text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded flex items-center space-x-1 font-semibold transition-colors cursor-pointer"
+            >
+              <Download className="w-3 h-3" />
+              <span>Export Report</span>
+            </button>
+          )}
+
           <button
             onClick={onResetData}
             title="Reset to 24 baseline seed workflows"
-            className="text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 bg-white px-2 py-1 rounded flex items-center space-x-1"
+            className="text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 bg-white px-2 py-1 rounded flex items-center space-x-1 cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span className="hidden md:inline">Reset Seed</span>
@@ -85,11 +101,23 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Justification: Navigation tabs allowing rapid switching between workflow registration, inventory, dashboard, and quiz. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex space-x-1 border-t border-slate-100 text-xs font-medium">
+      {/* Justification: Navigation tabs allowing rapid switching between 3D Web, registry, analytics, split view, registration, and quiz. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex space-x-1 border-t border-slate-100 text-xs font-medium overflow-x-auto">
+        <button
+          onClick={() => onViewChange('network3d')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'network3d'
+              ? 'border-blue-600 text-blue-600 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Globe className="w-3.5 h-3.5" />
+          <span>3D Organizational Web</span>
+        </button>
+
         <button
           onClick={() => onViewChange('registry')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors ${
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'registry'
               ? 'border-slate-900 text-slate-900 font-semibold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -100,8 +128,32 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <button
+          onClick={() => onViewChange('dashboard')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'dashboard'
+              ? 'border-slate-900 text-slate-900 font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span>Executive Cockpit</span>
+        </button>
+
+        <button
+          onClick={() => onViewChange('split')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'split'
+              ? 'border-blue-600 text-blue-600 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Split className="w-3.5 h-3.5" />
+          <span>Split Cockpit</span>
+        </button>
+
+        <button
           onClick={() => onViewChange('register')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors ${
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'register'
               ? 'border-slate-900 text-slate-900 font-semibold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -112,20 +164,8 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <button
-          onClick={() => onViewChange('dashboard')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors ${
-            activeView === 'dashboard'
-              ? 'border-slate-900 text-slate-900 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <BarChart3 className="w-3.5 h-3.5" />
-          <span>Coverage Dashboard</span>
-        </button>
-
-        <button
           onClick={() => onViewChange('quiz')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors ${
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'quiz'
               ? 'border-slate-900 text-slate-900 font-semibold'
               : 'border-transparent text-slate-500 hover:text-slate-800'

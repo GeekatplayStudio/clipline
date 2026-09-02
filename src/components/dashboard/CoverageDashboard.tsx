@@ -1,42 +1,101 @@
-// src/components/dashboard/CoverageDashboard.tsx
-// Justification: Executive Coverage Dashboard implementing PRD Section 5.4 with stacked exposure bars, side-by-side KPIs, and required footnotes.
-
-import React from 'react';
+import React, { useState } from 'react';
 // Justification: React framework import.
 
 import { ExecutiveMetrics } from '../../store/workflow_store.js';
-// Justification: Executive metrics interface.
+import { Workflow } from '../../types/workflow.js';
+import { ConfigurableKPIs } from './ConfigurableKPIs';
+import { AnalyticsSuite } from '../analytics/AnalyticsSuite';
+// Justification: Executive metrics and visual components.
 
-import { BarChart3, AlertTriangle, CheckCircle2, Info, Layers } from 'lucide-react';
+import { BarChart3, AlertTriangle, CheckCircle2, Info, Layers, Download, PieChart } from 'lucide-react';
 // Justification: Icons for enterprise visual clarity.
 
 interface CoverageDashboardProps {
   metrics: ExecutiveMetrics;
+  workflows?: Workflow[];
+  initialTab?: 'analytics' | 'breakdown';
+  onSelectWorkflow?: (workflow: Workflow) => void;
+  onFilterLOB?: (lob: string) => void;
+  onOpenExport?: () => void;
 }
 
-export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({ metrics }) => {
+export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({
+  metrics,
+  workflows = [],
+  initialTab = 'breakdown',
+  onSelectWorkflow,
+  onFilterLOB,
+  onOpenExport,
+}) => {
+  const [dashboardTab, setDashboardTab] = useState<'analytics' | 'breakdown'>(initialTab);
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto py-2">
       {/* Section Header */}
-      <div className="border-b border-slate-200 pb-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="border-b border-slate-200 pb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center space-x-2">
-            <BarChart3 className="w-5 h-5 text-slate-800" />
-            <span>Executive Governance & Coverage Dashboard</span>
+            <BarChart3 className="w-5 h-5 text-blue-600" />
+            <span>Executive Governance & Coverage Cockpit</span>
           </h2>
           <p className="text-xs text-slate-500">
-            Enterprise exposure oversight and compliance posture across business units
+            Enterprise exposure oversight, shadow IT quantification, and divisional compliance posture
           </p>
         </div>
-        <div className="text-xs bg-slate-100 border border-slate-300 rounded px-2.5 py-1 text-slate-600 font-mono">
-          Quarterly Executive Leadership Team (ELT) View
+
+        <div className="flex items-center gap-2.5">
+          {/* Sub-tab switcher */}
+          <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setDashboardTab('analytics')}
+              className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+                dashboardTab === 'analytics' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <PieChart className="w-3.5 h-3.5" />
+              <span>Visual Analytics</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDashboardTab('breakdown')}
+              className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+                dashboardTab === 'breakdown' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>LOB Exposure Bars</span>
+            </button>
+          </div>
+
+          {onOpenExport && (
+            <button
+              type="button"
+              onClick={onOpenExport}
+              className="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Report</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 1. TWO NUMBERS SIDE BY SIDE: Registered vs Estimated Unregistered + Footnote */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Configurable Interactive KPIs */}
+      <ConfigurableKPIs workflows={workflows} />
+
+      {dashboardTab === 'analytics' ? (
+        <AnalyticsSuite
+          workflows={workflows}
+          onSelectWorkflow={onSelectWorkflow}
+          onFilterLOB={onFilterLOB}
+        />
+      ) : (
+        <>
+          {/* ========================================================================= */}
+          {/* 1. TWO NUMBERS SIDE BY SIDE: Registered vs Estimated Unregistered + Footnote */}
+          {/* ========================================================================= */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Registered Workflows */}
         <div className="bg-white border border-slate-200 rounded p-4 shadow-sm">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
@@ -241,6 +300,8 @@ export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({ metrics })
           })}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

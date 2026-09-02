@@ -15,11 +15,13 @@
     "deploy:hostinger": "tsx scripts/hostinger_api_deploy.ts"
   },
   "dependencies": {
+    "@types/three": "^0.185.4",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.2",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@stryker-mutator/core": "^8.7.1",

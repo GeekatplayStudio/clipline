@@ -1,5 +1,5 @@
 // src/App.tsx
-// Justification: Top-level application shell orchestrating role state, view transitions, and modal workflows.
+// Justification: Top-level application shell orchestrating role state, 3D Web visualization, executive analytics, split cockpit, and ServiceNow modal workflows.
 
 import React, { useState, useEffect } from 'react';
 // Justification: React framework and lifecycle hooks.
@@ -10,7 +10,7 @@ import { workflowStore } from './store/workflow_store.js';
 import { Workflow, UserRole } from './types/workflow.js';
 // Justification: Domain type contracts.
 
-import { Header } from './components/layout/Header.js';
+import { Header, AppView } from './components/layout/Header.js';
 // Justification: Top navigation header with prototype banner and role switcher.
 
 import { RegistryTable } from './components/registry/RegistryTable.js';
@@ -28,12 +28,18 @@ import { KnowledgeCheck } from './components/quiz/KnowledgeCheck.js';
 import { WorkflowDetailModal } from './components/detail/WorkflowDetailModal.js';
 // Justification: Detailed workflow inspection and Program Lead action modal.
 
+import { RiskNetwork3D } from './components/network3d/RiskNetwork3D.js';
+// Justification: Three.js interactive 3D organizational risk web visualizer.
+
+import { ExportReportModal } from './components/reports/ExportReportModal.js';
+// Justification: Executive governance export modal for Printable PDF, ServiceNow CSV, and JSON audit manifests.
+
 export const App: React.FC = () => {
   // Justification: Role state initialized from reactive store.
   const [currentRole, setCurrentRole] = useState<UserRole>(workflowStore.getCurrentRole());
 
-  // Justification: Active view state: 'registry' | 'register' | 'dashboard' | 'quiz'.
-  const [activeView, setActiveView] = useState<'registry' | 'register' | 'dashboard' | 'quiz'>('registry');
+  // Justification: Active view state: 'network3d' | 'registry' | 'dashboard' | 'split' | 'register' | 'quiz'.
+  const [activeView, setActiveView] = useState<AppView>('network3d');
 
   // Justification: Workflows array updated reactively from store subscription.
   const [workflows, setWorkflows] = useState<Workflow[]>(workflowStore.getFilteredWorkflows());
@@ -43,6 +49,9 @@ export const App: React.FC = () => {
 
   // Justification: Currently inspected workflow modal target.
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
+
+  // Justification: Export executive report modal visibility.
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Justification: Subscribe to store state changes.
   useEffect(() => {
@@ -63,9 +72,9 @@ export const App: React.FC = () => {
   // Justification: Handle role switching from header dropdown.
   const handleRoleChange = (newRole: UserRole) => {
     workflowStore.setCurrentRole(newRole);
-    // Justification: Automatically navigate to executive dashboard when switching to Executive role.
+    // Justification: Automatically navigate to appropriate view when switching roles.
     if (newRole === 'executive') {
-      setActiveView('dashboard');
+      setActiveView('network3d');
     } else if (newRole === 'program_lead') {
       setActiveView('registry');
     }
@@ -106,10 +115,42 @@ export const App: React.FC = () => {
         activeView={activeView}
         onViewChange={setActiveView}
         onResetData={handleResetSeed}
+        onOpenExport={() => setShowExportModal(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4">
+        {/* 1. 3D Organizational Risk Web Visualizer */}
+        {activeView === 'network3d' && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+                  3D Organizational Risk Web
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Interactive multi-layer enterprise topology. Rotate, zoom, pan, and hover nodes to inspect citizen automations, manager hierarchies, and risk tiers.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExportModal(true)}
+                className="text-xs self-start sm:self-auto bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1.5 border border-slate-300 rounded-xl transition-colors shadow-sm cursor-pointer"
+              >
+                Export Briefing
+              </button>
+            </div>
+
+            <RiskNetwork3D
+              workflows={workflows}
+              onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+              onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
+            />
+          </div>
+        )}
+
+        {/* 2. Registry Table View */}
         {activeView === 'registry' && (
           <RegistryTable
             workflows={workflows}
@@ -117,10 +158,57 @@ export const App: React.FC = () => {
             onFilterChange={handleFilterChange}
             onResetFilters={handleResetFilters}
             onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+            onOpenExport={() => setShowExportModal(true)}
             currentRole={currentRole}
           />
         )}
 
+        {/* 3. Executive Coverage & Analytics Dashboard */}
+        {activeView === 'dashboard' && (
+          <CoverageDashboard
+            metrics={workflowStore.getExecutiveMetrics()}
+            workflows={workflows}
+            onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+            onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
+            onOpenExport={() => setShowExportModal(true)}
+          />
+        )}
+
+        {/* 4. Split Cockpit View (3D Web + Dense Registry Side-by-Side / Stacked) */}
+        {activeView === 'split' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-7">
+                <RiskNetwork3D
+                  workflows={workflows}
+                  onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+                  onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
+                />
+              </div>
+              <div className="lg:col-span-5 flex flex-col justify-start">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4">
+                  <h3 className="text-sm font-bold text-slate-900 mb-1">
+                    Split Cockpit Inspection
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Click any sphere in the 3D web on the left to immediately inspect the full governance dossier below.
+                  </p>
+                </div>
+                <RegistryTable
+                  workflows={workflows}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onResetFilters={handleResetFilters}
+                  onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+                  onOpenExport={() => setShowExportModal(true)}
+                  currentRole={currentRole}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. 4-Step Progressive Intake Wizard */}
         {activeView === 'register' && (
           <IntakeWizard
             onWorkflowCreated={handleWorkflowCreated}
@@ -128,10 +216,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {activeView === 'dashboard' && (
-          <CoverageDashboard metrics={workflowStore.getExecutiveMetrics()} />
-        )}
-
+        {/* 6. Acceptable Use Companion Knowledge Check */}
         {activeView === 'quiz' && (
           <KnowledgeCheck
             onComplete={() => {
@@ -152,6 +237,13 @@ export const App: React.FC = () => {
           }}
         />
       )}
+
+      {/* Export Report Modal */}
+      <ExportReportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        workflows={workflows}
+      />
 
       {/* Enterprise Footer */}
       <footer className="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 font-mono">
