@@ -7,10 +7,10 @@ import React from 'react';
 import { UserRole } from '../../types/workflow.js';
 // Justification: UserRole enum for role switcher state.
 
-import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Split, Download, Award } from 'lucide-react';
+import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Download, Award } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
-export type AppView = 'registry' | 'register' | 'dashboard' | 'quiz' | 'network3d' | 'split' | 'readiness';
+export type AppView = 'network3d' | 'dashboard' | 'registry' | 'readiness' | 'register' | 'quiz';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -101,8 +101,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Justification: Navigation tabs allowing rapid switching between 3D Web, registry, analytics, split view, registration, and quiz. */}
+      {/* Justification: Reorganized navigation tabs in logical order: 3D Web -> Visual Analytics -> Registry -> Certifications -> Register -> Quiz */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex space-x-1 border-t border-slate-100 text-xs font-medium overflow-x-auto">
+        {/* 1. 3D Organizational Web */}
         <button
           onClick={() => onViewChange('network3d')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
@@ -115,11 +116,25 @@ export const Header: React.FC<HeaderProps> = ({
           <span>3D Organizational Web</span>
         </button>
 
+        {/* 2. Visual Analytics & Charts */}
+        <button
+          onClick={() => onViewChange('dashboard')}
+          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
+            activeView === 'dashboard'
+              ? 'border-blue-600 text-blue-600 font-bold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span>Visual Analytics & Charts</span>
+        </button>
+
+        {/* 3. Registry Inventory */}
         <button
           onClick={() => onViewChange('registry')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'registry'
-              ? 'border-slate-900 text-slate-900 font-semibold'
+              ? 'border-slate-900 text-slate-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -127,18 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Registry Inventory</span>
         </button>
 
-        <button
-          onClick={() => onViewChange('dashboard')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
-            activeView === 'dashboard'
-              ? 'border-slate-900 text-slate-900 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <BarChart3 className="w-3.5 h-3.5" />
-          <span>Executive Cockpit</span>
-        </button>
-
+        {/* 4. Standards & Certifications */}
         <button
           onClick={() => onViewChange('readiness')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
@@ -148,26 +152,15 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
         >
           <Award className="w-3.5 h-3.5" />
-          <span>Certifications & Readiness</span>
+          <span>Standards & Certifications</span>
         </button>
 
-        <button
-          onClick={() => onViewChange('split')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
-            activeView === 'split'
-              ? 'border-blue-600 text-blue-600 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Split className="w-3.5 h-3.5" />
-          <span>Split Cockpit</span>
-        </button>
-
+        {/* 5. Register Workflow */}
         <button
           onClick={() => onViewChange('register')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'register'
-              ? 'border-slate-900 text-slate-900 font-semibold'
+              ? 'border-slate-900 text-slate-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -175,11 +168,12 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Register Workflow</span>
         </button>
 
+        {/* 6. Acceptable Use Knowledge Check */}
         <button
           onClick={() => onViewChange('quiz')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
             activeView === 'quiz'
-              ? 'border-slate-900 text-slate-900 font-semibold'
+              ? 'border-slate-900 text-slate-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >

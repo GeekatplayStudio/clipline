@@ -177,41 +177,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 4. Split Cockpit View (3D Web + Dense Registry Side-by-Side / Stacked) */}
-        {activeView === 'split' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-7">
-                <RiskNetwork3D
-                  workflows={workflows}
-                  onSelectWorkflow={(w) => setSelectedWorkflow(w)}
-                  onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
-                />
-              </div>
-              <div className="lg:col-span-5 flex flex-col justify-start">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4">
-                  <h3 className="text-sm font-bold text-slate-900 mb-1">
-                    Split Cockpit Inspection
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Click any sphere in the 3D web on the left to immediately inspect the full governance dossier below.
-                  </p>
-                </div>
-                <RegistryTable
-                  workflows={workflows}
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                  onResetFilters={handleResetFilters}
-                  onSelectWorkflow={(w) => setSelectedWorkflow(w)}
-                  onOpenExport={() => setShowExportModal(true)}
-                  currentRole={currentRole}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 5. Certification & Regulatory Readiness */}
+        {/* 4. Standards & Certifications */}
         {activeView === 'readiness' && (
           <CertificationReadinessPage
             onOpenExport={() => setShowExportModal(true)}

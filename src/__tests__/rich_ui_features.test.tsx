@@ -144,6 +144,28 @@ describe('Rich UI & 3D Visualization Suite', () => {
       fireEvent.click(screen.getByText('Acima'));
       expect(onFilterLOB).toHaveBeenCalledWith('Acima');
     });
+
+    it('switches between Decision Flow, 5-Axis Radar, and Tool Horizon views', () => {
+      render(<AnalyticsSuite workflows={sampleWorkflows} />);
+
+      // Switch to Decision & Data Flow
+      const flowBtn = screen.getByRole('button', { name: /Decision & Data Flow/i });
+      fireEvent.click(flowBtn);
+      expect(screen.getByText(/Data Sensitivity & Decision Influence Risk Cascade/i)).toBeInTheDocument();
+      expect(screen.getByText(/1\. Data Category Ingested/i)).toBeInTheDocument();
+
+      // Switch to 5-Axis Radar
+      const radarBtn = screen.getByRole('button', { name: /AI Literacy 5-Axis Radar/i });
+      fireEvent.click(radarBtn);
+      expect(screen.getByText(/AI Literacy 5-Axis Polar Radar against 80% Benchmark/i)).toBeInTheDocument();
+      expect(screen.getByText(/LOB Training Completion vs\. 80% Benchmark/i)).toBeInTheDocument();
+
+      // Switch to Tool Ecosystem & Horizon
+      const toolsBtn = screen.getByRole('button', { name: /Tool Ecosystem & Horizon/i });
+      fireEvent.click(toolsBtn);
+      expect(screen.getByText(/Approved AI Tool Adoption Velocity/i)).toBeInTheDocument();
+      expect(screen.getByText(/Periodic Reattestation Horizon/i)).toBeInTheDocument();
+    });
   });
 
   // 3. ConfigurableKPIs
