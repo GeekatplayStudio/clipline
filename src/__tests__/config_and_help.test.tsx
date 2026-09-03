@@ -70,7 +70,10 @@ describe('System Configurations, Theme Switching & Overlay Help Suite', () => {
         'upbound_ai_config_v1',
         JSON.stringify({ theme: 'dark', overlayHelpEnabled: true })
       );
-      const StoreClass = configStore.constructor as any;
+      const StoreClass = configStore.constructor as unknown as new () => Pick<
+        typeof configStore,
+        'getConfig'
+      >;
       const rehydrated = new StoreClass();
       expect(rehydrated.getConfig().theme).toBe('dark');
       expect(rehydrated.getConfig().overlayHelpEnabled).toBe(true);
@@ -199,7 +202,9 @@ describe('System Configurations, Theme Switching & Overlay Help Suite', () => {
       fireEvent.mouseOver(btn);
 
       expect(screen.getByText('Governance Tier')).toBeInTheDocument();
-      expect(screen.getByText(/Any workflow that attempts autonomous credit underwriting/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Any workflow that attempts autonomous credit underwriting/i)
+      ).toBeInTheDocument();
 
       // Mouse out of the button to background
       fireEvent.mouseOut(btn, { relatedTarget: document.body });

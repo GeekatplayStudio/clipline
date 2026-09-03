@@ -15,15 +15,15 @@ import {
   Layers,
   PlusCircle,
   BarChart3,
-  Globe,
   Download,
   Award,
   Cpu,
   Settings,
+  LogOut,
 } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
-export type AppView = 'network3d' | 'dashboard' | 'registry' | 'tools' | 'readiness' | 'register' | 'quiz';
+export type AppView = 'dashboard' | 'registry' | 'tools' | 'readiness' | 'register' | 'quiz';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -33,6 +33,7 @@ interface HeaderProps {
   onResetData: () => void;
   onOpenExport?: () => void;
   onOpenSettings?: () => void;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   onResetData,
   onOpenExport,
   onOpenSettings,
+  onLogout,
 }) => {
   return (
     <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
@@ -123,25 +125,24 @@ export const Header: React.FC<HeaderProps> = ({
               <Settings className="w-4 h-4" />
             </button>
           )}
+
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Sign out"
+              title="Sign out"
+              className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-rose-700 border border-slate-200 dark:border-slate-700 hover:border-rose-200 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Justification: Reorganized navigation tabs in logical order: 3D Web -> Visual Analytics -> Registry -> Certifications -> Register -> Quiz */}
+      {/* Primary navigation; 3D topology lives inside Visual Analytics. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex space-x-1 border-t border-slate-100 text-xs font-medium overflow-x-auto">
-        {/* 1. 3D Organizational Web */}
-        <button
-          onClick={() => onViewChange('network3d')}
-          className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${
-            activeView === 'network3d'
-              ? 'border-blue-600 text-blue-600 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Globe className="w-3.5 h-3.5" />
-          <span>3D Organizational Web</span>
-        </button>
-
-        {/* 2. Visual Analytics & Charts */}
+        {/* 1. Visual Analytics & Charts */}
         <button
           onClick={() => onViewChange('dashboard')}
           className={`py-2 px-3 border-b-2 flex items-center space-x-1.5 transition-colors whitespace-nowrap cursor-pointer ${

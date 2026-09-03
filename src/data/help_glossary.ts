@@ -23,7 +23,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Governed Workflow',
     aliases: ['governed', 'governed low', 'governed workflows', 'tier 1 governed'],
     category: 'Governance Tier',
-    shortDefinition: 'An automation formally registered in ServiceNow CMDB with verified compliance controls.',
+    shortDefinition:
+      'An automation formally registered in ServiceNow CMDB with verified compliance controls.',
     detailedExplanation:
       'A governed workflow has passed algorithmic tiering or human GRC review, is bound to an identified employee owner, adheres to zero-PII restrictions, and participates in automated 90-day periodic reattestation.',
     upboundContext:
@@ -37,7 +38,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Tier 4 Prohibited',
     aliases: ['tier 4', 'prohibited', 'banned', 'tier 4 prohibited'],
     category: 'Governance Tier',
-    shortDefinition: 'High-risk or legally non-compliant automation categorically prohibited from citizen developer execution.',
+    shortDefinition:
+      'High-risk or legally non-compliant automation categorically prohibited from citizen developer execution.',
     detailedExplanation:
       'Any workflow that attempts autonomous credit underwriting, lease approvals, automated debt collection outreach, or ingests production payment credentials without human oversight. Prohibited workflows are automatically blocked.',
     upboundContext:
@@ -51,7 +53,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Tier 3 High Risk',
     aliases: ['tier 3', 'high risk', 'tier 3 high risk'],
     category: 'Governance Tier',
-    shortDefinition: 'Automations touching customer financial data, customer communications, or core financial operations.',
+    shortDefinition:
+      'Automations touching customer financial data, customer communications, or core financial operations.',
     detailedExplanation:
       'These workflows involve customer PII, account balances, payment history, or generate outbound communications sent directly to customers. They require explicit dual sign-off from InfoSec and Legal before deployment.',
     upboundContext:
@@ -65,7 +68,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Tier 2 Moderate Risk',
     aliases: ['tier 2', 'moderate risk', 'tier 2 moderate'],
     category: 'Governance Tier',
-    shortDefinition: 'Automations handling internal confidential business information or broad employee workflows.',
+    shortDefinition:
+      'Automations handling internal confidential business information or broad employee workflows.',
     detailedExplanation:
       'Workflows that process company strategy, internal financial reporting drafts, operational guidelines, or team-wide documentation. Subject to review and approval by the designated AI Program Lead.',
     upboundContext:
@@ -84,8 +88,7 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
       'Workflows utilizing company-approved AI tools (e.g. Copilot, Claude Enterprise) for individual drafting, code syntax assistance, or public research. Automatically approved upon registration.',
     upboundContext:
       'Encourages workforce AI adoption and skill growth without bureaucratic friction for safe everyday tasks.',
-    governanceImplication:
-      'Auto-approved instantly upon intake submission; reattested annually.',
+    governanceImplication: 'Auto-approved instantly upon intake submission; reattested annually.',
     regulatoryReference: 'NIST AI RMF MAP 1.1',
   },
   {
@@ -93,7 +96,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Shadow IT Exposure Gap',
     aliases: ['shadow it', 'unregistered', 'exposure gap', 'unregistered seats'],
     category: 'Risk & Compliance',
-    shortDefinition: 'The estimated gap between formally registered AI workflows and active AI tool user licenses.',
+    shortDefinition:
+      'The estimated gap between formally registered AI workflows and active AI tool user licenses.',
     detailedExplanation:
       'By comparing corporate SSO identity logs for approved AI tools against the ServiceNow workflow registry, we estimate approximately 142 unregistered automations operating without formal review across Upbound divisions.',
     upboundContext:
@@ -107,7 +111,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'ISO/IEC 42001:2023 (AIMS)',
     aliases: ['iso 42001', 'aims', 'iso/iec 42001', 'plan-do-check-act'],
     category: 'Regulatory Standard',
-    shortDefinition: 'The international certifiable management standard for Artificial Intelligence Management Systems.',
+    shortDefinition:
+      'The international certifiable management standard for Artificial Intelligence Management Systems.',
     detailedExplanation:
       'Follows the Plan-Do-Check-Act (PDCA) management system structure. Requires documented policies, risk assessments, Clause 7.2 (competence verification), and Clause 7.3 (awareness across all AI practitioners).',
     upboundContext:
@@ -135,7 +140,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'CFPB Regulation B / ECOA',
     aliases: ['cfpb', 'regulation b', 'reg b', 'ecoa', 'adverse action'],
     category: 'Regulatory Standard',
-    shortDefinition: 'Equal Credit Opportunity Act statutory requirements prohibiting algorithmic bias and requiring explainable adverse action.',
+    shortDefinition:
+      'Equal Credit Opportunity Act statutory requirements prohibiting algorithmic bias and requiring explainable adverse action.',
     detailedExplanation:
       'When a consumer is denied credit or a lease agreement, the creditor must provide specific, principal reasons for the denial. Creditors cannot justify opacity by claiming an AI model is too complex or a third-party black box.',
     upboundContext:
@@ -149,7 +155,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'EU AI Act (Article 4 Literacy)',
     aliases: ['eu ai act', 'ai literacy', 'article 4', 'article 50'],
     category: 'Regulatory Standard',
-    shortDefinition: 'Statutory regulation mandating workforce AI literacy and risk classification across organizations.',
+    shortDefinition:
+      'Statutory regulation mandating workforce AI literacy and risk classification across organizations.',
     detailedExplanation:
       'Article 4 took effect in February 2025, legally requiring employers to ensure staff operating AI systems possess an adequate level of AI literacy. Article 50 enforces transparency for synthetic media and AI-generated text.',
     upboundContext:
@@ -177,7 +184,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Zero Data Retention (ZDR)',
     aliases: ['zero data retention', 'zdr', 'model training opt-out', 'no training'],
     category: 'Risk & Compliance',
-    shortDefinition: 'Contractual guarantee from AI vendors that user prompts are never stored or used to train future models.',
+    shortDefinition:
+      'Contractual guarantee from AI vendors that user prompts are never stored or used to train future models.',
     detailedExplanation:
       'Under standard consumer AI terms (e.g. free ChatGPT), user prompts may be logged and used to retrain foundation models. Enterprise ZDR agreements legally bind vendors to discard inputs immediately after generating an inference.',
     upboundContext:
@@ -191,7 +199,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Human-in-the-Loop (HITL)',
     aliases: ['hitl', 'human in the loop', 'human oversight', 'human review'],
     category: 'Governance Tier',
-    shortDefinition: 'Mandatory human verification and sign-off before AI-generated outputs affect external parties or business operations.',
+    shortDefinition:
+      'Mandatory human verification and sign-off before AI-generated outputs affect external parties or business operations.',
     detailedExplanation:
       'Ensures that autonomous agents do not directly execute critical financial transactions, send communications to customers, or update credit files without a human supervisor reviewing and approving the result.',
     upboundContext:
@@ -210,8 +219,7 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
       'Provides point-of-sale and e-commerce lease financing at thousands of retail partners across the United States. High transaction velocity, automated underwriting algorithms, and digital consumer onboarding.',
     upboundContext:
       'Largest volume of citizen developer automations in analytics, underwriting scripts, and retail partner communications.',
-    governanceImplication:
-      'Strict credit scoring and FCRA/ECOA adverse action compliance controls required.',
+    governanceImplication: 'Strict credit scoring and FCRA/ECOA adverse action compliance controls required.',
     regulatoryReference: 'FCRA 15 U.S.C. § 1681; ECOA 15 U.S.C. § 1691',
   },
   {
@@ -219,7 +227,8 @@ export const HELP_GLOSSARY: GlossaryTerm[] = [
     term: 'Rent-A-Center (RAC)',
     aliases: ['rac', 'rent-a-center', 'rent a center'],
     category: 'Enterprise Structure',
-    shortDefinition: 'Upbound Group’s legacy brick-and-mortar retail brand operating hundreds of corporate stores nationwide.',
+    shortDefinition:
+      'Upbound Group’s legacy brick-and-mortar retail brand operating hundreds of corporate stores nationwide.',
     detailedExplanation:
       'Direct customer leasing of furniture, electronics, appliances, and computers. Features regional field store managers, store associate training, and local retail delivery operations.',
     upboundContext:

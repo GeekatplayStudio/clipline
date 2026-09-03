@@ -1,7 +1,7 @@
 // src/App.tsx
 // Justification: Top-level application shell orchestrating role state, 3D Web visualization, executive analytics, split cockpit, and ServiceNow modal workflows.
 
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 // Justification: React framework and lifecycle hooks.
 
 import { workflowStore } from './store/workflow_store.js';
@@ -28,12 +28,6 @@ import { KnowledgeCheck } from './components/quiz/KnowledgeCheck.js';
 import { WorkflowDetailModal } from './components/detail/WorkflowDetailModal.js';
 // Justification: Detailed workflow inspection and Program Lead action modal.
 
-const RiskNetwork3D = lazy(() =>
-  import('./components/network3d/RiskNetwork3D.js').then((module) => ({
-    default: module.RiskNetwork3D,
-  }))
-);
-
 import { ExportReportModal } from './components/reports/ExportReportModal.js';
 // Justification: Executive governance export modal for Printable PDF, ServiceNow CSV, and JSON audit manifests.
 
@@ -48,13 +42,19 @@ import { SettingsModal } from './components/settings/SettingsModal.js';
 
 import { OverlayHelpHUD } from './components/help/OverlayHelpHUD.js';
 // Justification: Interactive mouse-over HUD displaying deep governance definitions.
+import { LoginScreen } from './components/auth/LoginScreen.js';
+import { hasPersistentAccess, revokeAccess } from './auth/access_control.js';
 
-export const App: React.FC = () => {
+interface RegistryApplicationProps {
+  onLogout: () => void;
+}
+
+const RegistryApplication: React.FC<RegistryApplicationProps> = ({ onLogout }) => {
   // Justification: Role state initialized from reactive store.
   const [currentRole, setCurrentRole] = useState<UserRole>(workflowStore.getCurrentRole());
 
-  // Justification: Active view state: 'network3d' | 'registry' | 'dashboard' | 'split' | 'register' | 'quiz'.
-  const [activeView, setActiveView] = useState<AppView>('network3d');
+  // Start in the consolidated visual analytics cockpit.
+  const [activeView, setActiveView] = useState<AppView>('dashboard');
 
   // Justification: Workflows array updated reactively from store subscription.
   const [workflows, setWorkflows] = useState<Workflow[]>(workflowStore.getFilteredWorkflows());
@@ -130,51 +130,12 @@ export const App: React.FC = () => {
         onResetData={handleResetSeed}
         onOpenExport={() => setShowExportModal(true)}
         onOpenSettings={() => setShowSettingsModal(true)}
+        onLogout={onLogout}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4">
-        {/* 1. 3D Organizational Risk Web Visualizer */}
-        {activeView === 'network3d' && (
-          <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
-                  3D Organizational Risk Web
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Interactive multi-layer enterprise topology. Rotate, zoom, pan, and hover nodes to inspect
-                  citizen automations, manager hierarchies, and risk tiers.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowExportModal(true)}
-                className="text-xs self-start sm:self-auto bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1.5 border border-slate-300 rounded-xl transition-colors shadow-sm cursor-pointer"
-              >
-                Export Briefing
-              </button>
-            </div>
-
-            <Suspense
-              fallback={
-                <div
-                  className="h-[580px] rounded-2xl bg-slate-900 animate-pulse"
-                  aria-label="Loading risk topology"
-                />
-              }
-            >
-              <RiskNetwork3D
-                workflows={workflows}
-                onSelectWorkflow={(w) => setSelectedWorkflow(w)}
-                onFilterLOB={(lob) => handleFilterChange({ lob })}
-              />
-            </Suspense>
-          </div>
-        )}
-
-        {/* 2. Registry Table View */}
+        {/* Registry Table View */}
         {activeView === 'registry' && (
           <RegistryTable
             workflows={workflows}
@@ -256,10 +217,7 @@ export const App: React.FC = () => {
       />
 
       {/* System Settings & Overlay Help Modal */}
-      <SettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-      />
+      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
 
       {/* Interactive Mouse-Over Governance Overlay Help HUD */}
       <OverlayHelpHUD />
@@ -270,5 +228,22 @@ export const App: React.FC = () => {
         Standards
       </footer>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(hasPersistentAccess);
+
+  if (!isAuthenticated) {
+    return <LoginScreen onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
+
+  return (
+    <RegistryApplication
+      onLogout={() => {
+        revokeAccess();
+        setIsAuthenticated(false);
+      }}
+    />
   );
 };

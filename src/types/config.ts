@@ -15,7 +15,8 @@ export interface GlossaryTerm {
   id: string;
   term: string;
   aliases: string[];
-  category: 'Governance Tier' | 'Enterprise Structure' | 'Regulatory Standard' | 'Risk & Compliance' | 'Architecture';
+  category:
+    'Governance Tier' | 'Enterprise Structure' | 'Regulatory Standard' | 'Risk & Compliance' | 'Architecture';
   shortDefinition: string;
   detailedExplanation: string;
   upboundContext: string;

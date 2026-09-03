@@ -37,6 +37,7 @@ describe('Citizen Developer Registry UI Components', () => {
 
     expect(screen.getByText(/data model exploration/i)).toBeInTheDocument();
     expect(screen.getByText(/Viewing as:/i)).toBeInTheDocument();
+    expect(screen.queryByText('3D Organizational Web')).not.toBeInTheDocument();
   });
 
   it('triggers role change callback when role dropdown value changes', () => {
@@ -150,7 +151,7 @@ describe('Citizen Developer Registry UI Components', () => {
   // =========================================================================
   it('renders executive metrics, stacked exposure bars, and the required footnote', () => {
     const metrics = workflowStore.getExecutiveMetrics();
-    render(<CoverageDashboard metrics={metrics} />);
+    render(<CoverageDashboard metrics={metrics} onOpenExport={() => {}} />);
 
     // KPI cards
     expect(screen.getByText(/Registered Workflows \(Governed\)/i)).toBeInTheDocument();
@@ -167,6 +168,12 @@ describe('Citizen Developer Registry UI Components', () => {
     // Literacy standard
     expect(screen.getByText(/AI Literacy Standard Coverage/i)).toBeInTheDocument();
     expect(screen.getByText(/Target Line: 80%/i)).toBeInTheDocument();
+
+    const lobTab = screen.getByRole('button', { name: /LOB Exposure Bars/i });
+    const networkTab = screen.getByRole('button', { name: /3D Organizational Web/i });
+    const exportButton = screen.getByRole('button', { name: /Export Report/i });
+    expect(lobTab.compareDocumentPosition(networkTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(networkTab.compareDocumentPosition(exportButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   // =========================================================================

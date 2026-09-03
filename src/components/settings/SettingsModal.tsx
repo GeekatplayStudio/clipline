@@ -4,17 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { configStore } from '../../store/config_store.js';
 import { AppConfig } from '../../types/config.js';
-import {
-  X,
-  Settings,
-  Sun,
-  Moon,
-  Laptop,
-  HelpCircle,
-  RotateCcw,
-  Zap,
-  CheckCircle2,
-} from 'lucide-react';
+import { X, Settings, Sun, Moon, Laptop, HelpCircle, RotateCcw, Zap, CheckCircle2 } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -136,7 +126,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   )}
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                  When enabled, hovering your mouse over any term, acronym, division name (e.g. <strong>LOB</strong>, <strong>Acima</strong>), or risk status (e.g. <strong>Governed</strong>, <strong>Tier 4 Prohibited</strong>) triggers a floating governance explanation HUD.
+                  When enabled, hovering your mouse over any term, acronym, division name (e.g.{' '}
+                  <strong>LOB</strong>, <strong>Acima</strong>), or risk status (e.g.{' '}
+                  <strong>Governed</strong>, <strong>Tier 4 Prohibited</strong>) triggers a floating
+                  governance explanation HUD.
                 </p>
               </div>
 

@@ -13,15 +13,15 @@ export const OverlayHelpHUD: React.FC = () => {
   const [hudPosition, setHudPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
-    const unsubscribe = configStore.subscribe(setConfig);
+    const unsubscribe = configStore.subscribe((nextConfig) => {
+      setConfig(nextConfig);
+      if (!nextConfig.overlayHelpEnabled) setActiveTerm(null);
+    });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!config.overlayHelpEnabled) {
-      setActiveTerm(null);
-      return;
-    }
+    if (!config.overlayHelpEnabled) return;
 
     let currentMatchedElement: HTMLElement | null = null;
 

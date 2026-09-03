@@ -70,7 +70,8 @@ function deployToGitBranch() {
   // Step 2: Push dist to deploy branch
   console.log('\nStep 2: Preparing static assets deployment branch...');
   const tempDir = path.join(os.tmpdir(), `deploy-${Date.now()}`);
-  const repositoryUrl = process.env.DEPLOY_REPOSITORY_URL || 'https://github.com/GeekatplayStudio/clipline.git';
+  const repositoryUrl =
+    process.env.DEPLOY_REPOSITORY_URL || 'https://github.com/GeekatplayStudio/clipline.git';
   fs.mkdirSync(tempDir, { recursive: true });
 
   const distDir = path.resolve(process.cwd(), 'dist');

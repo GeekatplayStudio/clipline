@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 // Justification: React framework import.
 
 import { ExecutiveMetrics } from '../../store/workflow_store.js';
@@ -7,13 +7,28 @@ import { ConfigurableKPIs } from './ConfigurableKPIs';
 import { AnalyticsSuite } from '../analytics/AnalyticsSuite';
 // Justification: Executive metrics and visual components.
 
-import { BarChart3, AlertTriangle, CheckCircle2, Info, Layers, Download, PieChart } from 'lucide-react';
+import {
+  BarChart3,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  Layers,
+  Download,
+  PieChart,
+  Globe,
+} from 'lucide-react';
 // Justification: Icons for enterprise visual clarity.
+
+const RiskNetwork3D = lazy(() =>
+  import('../network3d/RiskNetwork3D.js').then((module) => ({ default: module.RiskNetwork3D }))
+);
+
+type DashboardTab = 'analytics' | 'breakdown' | 'network3d';
 
 interface CoverageDashboardProps {
   metrics: ExecutiveMetrics;
   workflows?: Workflow[];
-  initialTab?: 'analytics' | 'breakdown';
+  initialTab?: DashboardTab;
   onSelectWorkflow?: (workflow: Workflow) => void;
   onFilterLOB?: (lob: LineOfBusiness) => void;
   onFilterStatus?: (status: WorkflowStatus | 'All') => void;
@@ -33,7 +48,7 @@ export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({
   onFilterOverdue,
   onOpenExport,
 }) => {
-  const [dashboardTab, setDashboardTab] = useState<'analytics' | 'breakdown'>(initialTab);
+  const [dashboardTab, setDashboardTab] = useState<DashboardTab>(initialTab);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto py-2">
@@ -76,6 +91,18 @@ export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({
               <Layers className="w-3.5 h-3.5" />
               <span>LOB Exposure Bars</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setDashboardTab('network3d')}
+              className={`px-3 py-1 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
+                dashboardTab === 'network3d'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>3D Organizational Web</span>
+            </button>
           </div>
 
           {onOpenExport && (
@@ -101,6 +128,31 @@ export const CoverageDashboard: React.FC<CoverageDashboardProps> = ({
 
       {dashboardTab === 'analytics' ? (
         <AnalyticsSuite workflows={workflows} onSelectWorkflow={onSelectWorkflow} onFilterLOB={onFilterLOB} />
+      ) : dashboardTab === 'network3d' ? (
+        <section className="space-y-3 animate-in fade-in duration-300" aria-labelledby="network-heading">
+          <div>
+            <h3 id="network-heading" className="text-sm font-bold text-slate-900">
+              3D Organizational Risk Web
+            </h3>
+            <p className="text-xs text-slate-500">
+              Rotate, zoom, pan, and inspect workflows across the enterprise risk topology.
+            </p>
+          </div>
+          <Suspense
+            fallback={
+              <div
+                className="h-[580px] rounded-2xl bg-slate-900 animate-pulse"
+                aria-label="Loading risk topology"
+              />
+            }
+          >
+            <RiskNetwork3D
+              workflows={workflows}
+              onSelectWorkflow={onSelectWorkflow}
+              onFilterLOB={onFilterLOB}
+            />
+          </Suspense>
+        </section>
       ) : (
         <>
           {/* ========================================================================= */}
