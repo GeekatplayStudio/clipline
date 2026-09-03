@@ -35,6 +35,15 @@ import { DeploymentAgent } from './definitions/deployment_agent.js';
 import { AgentTask, AgentExecutionContext, VerificationResult } from './types.js';
 // Justification: Types for task creation and verification.
 
+function emitGitHubError(command: readonly string[], detail: string): void {
+  if (process.env.GITHUB_ACTIONS !== 'true') return;
+  const escape = (value: string) =>
+    value.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+  console.error(
+    `::error title=${escape(`npm ${command.join(' ')} failed`)}::${escape(detail.slice(0, 2000))}`
+  );
+}
+
 async function verifyNpm(args: string[]): Promise<{ success: boolean; diagnostics?: string[] }> {
   try {
     const result = await runNpm(args, {
@@ -43,9 +52,14 @@ async function verifyNpm(args: string[]): Promise<{ success: boolean; diagnostic
     });
     return result.exitCode === 0
       ? { success: true }
-      : { success: false, diagnostics: [(result.stderr || result.stdout).trim()] };
+      : (() => {
+          const detail = (result.stderr || result.stdout).trim();
+          emitGitHubError(args, detail);
+          return { success: false, diagnostics: [detail] };
+        })();
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
+    emitGitHubError(args, detail);
     return { success: false, diagnostics: [detail] };
   }
 }
