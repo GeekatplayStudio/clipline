@@ -43,6 +43,12 @@ import { CertificationReadinessPage } from './components/readiness/Certification
 import { ToolRequestsPage } from './components/tools/ToolRequestsPage.js';
 // Justification: Employee AI tool intake catalog, vendor safety analysis, and certification audit cockpit.
 
+import { SettingsModal } from './components/settings/SettingsModal.js';
+// Justification: User configuration modal for theme mode and overlay glossary help.
+
+import { OverlayHelpHUD } from './components/help/OverlayHelpHUD.js';
+// Justification: Interactive mouse-over HUD displaying deep governance definitions.
+
 export const App: React.FC = () => {
   // Justification: Role state initialized from reactive store.
   const [currentRole, setCurrentRole] = useState<UserRole>(workflowStore.getCurrentRole());
@@ -62,6 +68,9 @@ export const App: React.FC = () => {
   // Justification: Export executive report modal visibility.
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // Justification: System configuration & overlay help modal visibility.
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
   // Justification: Subscribe to store state changes.
   useEffect(() => {
     const unsubscribe = workflowStore.subscribe(() => {
@@ -72,26 +81,21 @@ export const App: React.FC = () => {
       // Justification: Keep selected workflow synchronized if it was updated in modal.
       setSelectedWorkflow((selected) => {
         if (!selected) return null;
-        return workflowStore.getAllWorkflows().find((workflow) => workflow.id === selected.id) ?? null;
+        return workflowStore.getAllWorkflows().find((w) => w.id === selected.id) ?? null;
       });
     });
-    return unsubscribe;
+
+    return () => unsubscribe();
   }, []);
 
-  // Justification: Handle role switching from header dropdown.
+  // Justification: Handle role switcher in header.
   const handleRoleChange = (newRole: UserRole) => {
     workflowStore.setCurrentRole(newRole);
-    // Justification: Automatically navigate to appropriate view when switching roles.
-    if (newRole === 'executive') {
-      setActiveView('network3d');
-    } else if (newRole === 'program_lead') {
-      setActiveView('registry');
-    }
   };
 
-  // Justification: Handle filter modifications from table controls.
-  const handleFilterChange = (updates: Partial<typeof filters>) => {
-    workflowStore.setFilters(updates);
+  // Justification: Handle filter changes from table or dashboard.
+  const handleFilterChange = (newFilters: Parameters<typeof workflowStore.setFilters>[0]) => {
+    workflowStore.setFilters(newFilters);
   };
 
   // Justification: Reset filters back to default show-all state.
@@ -99,7 +103,7 @@ export const App: React.FC = () => {
     workflowStore.resetFilters();
   };
 
-  // Justification: Callback when a new workflow is registered through the 4-step wizard.
+  // Justification: Post-creation workflow callback.
   const handleWorkflowCreated = (newId: string) => {
     const created = workflowStore.getAllWorkflows().find((w) => w.id === newId);
     if (created) {
@@ -116,7 +120,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       {/* Pinned Top Navigation with Persistent Prototype Banner */}
       <Header
         currentRole={currentRole}
@@ -125,6 +129,7 @@ export const App: React.FC = () => {
         onViewChange={setActiveView}
         onResetData={handleResetSeed}
         onOpenExport={() => setShowExportModal(true)}
+        onOpenSettings={() => setShowSettingsModal(true)}
       />
 
       {/* Main Content Area */}
@@ -250,8 +255,17 @@ export const App: React.FC = () => {
         workflows={workflowStore.getAllWorkflows()}
       />
 
+      {/* System Settings & Overlay Help Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
+
+      {/* Interactive Mouse-Over Governance Overlay Help HUD */}
+      <OverlayHelpHUD />
+
       {/* Enterprise Footer */}
-      <footer className="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 font-mono">
+      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-3 text-center text-xs text-slate-400 font-mono">
         Citizen Developer Registry Prototype &middot; Target ServiceNow Ingestion Spec &middot; Upbound Group
         Standards
       </footer>

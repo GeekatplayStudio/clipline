@@ -19,6 +19,7 @@ import {
   Download,
   Award,
   Cpu,
+  Settings,
 } from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
@@ -31,6 +32,7 @@ interface HeaderProps {
   onViewChange: (view: AppView) => void;
   onResetData: () => void;
   onOpenExport?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -40,9 +42,10 @@ export const Header: React.FC<HeaderProps> = ({
   onViewChange,
   onResetData,
   onOpenExport,
+  onOpenSettings,
 }) => {
   return (
-    <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-50">
+    <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
       {/* Justification: PRD Section 1 & Section 7 Mandate: Visible persistent banner stating prototype status. */}
       <div className="bg-slate-800 text-slate-200 text-xs px-4 py-1.5 flex items-center justify-between font-mono">
         <div className="flex items-center space-x-2">
@@ -103,11 +106,23 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onResetData}
             title="Reset to 24 baseline seed workflows"
-            className="text-xs text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 bg-white px-2 py-1 rounded flex items-center space-x-1 cursor-pointer"
+            className="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 rounded flex items-center space-x-1 cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span className="hidden md:inline">Reset Seed</span>
           </button>
+
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label="System Configurations"
+              title="System Configurations & Overlay Help"
+              className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
