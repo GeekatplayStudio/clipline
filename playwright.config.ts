@@ -5,13 +5,13 @@ export default defineConfig({
   timeout: 30_000,
   retries: process.env.CI ? 1 : 0,
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: 'http://127.0.0.1:43917',
     channel: process.env.CI ? undefined : 'chrome',
     headless: true,
   },
   webServer: {
-    command: 'npm run preview -- --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
+    command: 'npm run preview -- --host 127.0.0.1 --port 43917',
+    url: 'http://127.0.0.1:43917',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
