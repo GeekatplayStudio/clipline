@@ -20,4 +20,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=moderate
+      - name: Install browser used by end-to-end tests
+        run: npx playwright install chromium
       - run: npm run verify
