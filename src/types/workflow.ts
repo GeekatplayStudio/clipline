@@ -5,12 +5,7 @@
 export type UserRole = 'citizen_developer' | 'program_lead' | 'executive';
 
 // Justification: Lines of Business representing Upbound Group corporate divisions per PRD Section 4.
-export type LineOfBusiness =
-  | 'Acima'
-  | 'Rent-A-Center'
-  | 'Brigit'
-  | 'Mexico'
-  | 'Corporate';
+export type LineOfBusiness = 'Acima' | 'Rent-A-Center' | 'Brigit' | 'Mexico' | 'Corporate';
 
 export type LOB = LineOfBusiness;
 
@@ -58,40 +53,20 @@ export type DecisionInfluence =
   | 'Customer-affecting decision — credit or underwriting';
 
 // Justification: Exposure scope of generated content.
-export type OutputAudience =
-  | 'Just me'
-  | 'My team'
-  | 'Internal broad'
-  | 'Customer-facing';
+export type OutputAudience = 'Just me' | 'My team' | 'Internal broad' | 'Customer-facing';
 
 // Justification: Degree of human oversight over generated outputs.
-export type HumanReviewFrequency =
-  | 'Every output reviewed'
-  | 'Sampled'
-  | 'None';
+export type HumanReviewFrequency = 'Every output reviewed' | 'Sampled' | 'None';
 
 // Justification: Derived risk tiers determined by algorithmic evaluation.
-export type RiskTier =
-  | 'Tier 1 Low'
-  | 'Tier 2 Moderate'
-  | 'Tier 3 High'
-  | 'Tier 4 Prohibited';
+export type RiskTier = 'Tier 1 Low' | 'Tier 2 Moderate' | 'Tier 3 High' | 'Tier 4 Prohibited';
 
 // Justification: Workflow lifecycle statuses managed through governance reviews.
 export type WorkflowStatus =
-  | 'Draft'
-  | 'Submitted'
-  | 'In review'
-  | 'Approved'
-  | 'Approved with conditions'
-  | 'Declined'
-  | 'Retired';
+  'Draft' | 'Submitted' | 'In review' | 'Approved' | 'Approved with conditions' | 'Declined' | 'Retired';
 
 // Justification: AI Literacy tiers tracked per builder.
-export type BuilderLiteracyTier =
-  | 'Tier 1 Aware'
-  | 'Tier 2 Fluent'
-  | 'Tier 3 Builder';
+export type BuilderLiteracyTier = 'Tier 1 Aware' | 'Tier 2 Fluent' | 'Tier 3 Builder';
 
 // Justification: Approval routing recipient according to derived risk tier.
 export type ApprovalRoute =

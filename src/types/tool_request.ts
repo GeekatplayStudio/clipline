@@ -15,11 +15,7 @@ export type ToolCategory =
 export type ToolRiskLevel = 'Low' | 'Moderate' | 'High' | 'Critical';
 
 export type ToolDecisionStatus =
-  | 'Under Review'
-  | 'Approved'
-  | 'Approved with Conditions'
-  | 'Declined'
-  | 'Banned';
+  'Under Review' | 'Approved' | 'Approved with Conditions' | 'Declined' | 'Banned';
 
 export type DataHandlingModel =
   | 'Enterprise Tenant (Zero Retention)'
@@ -46,7 +42,8 @@ export interface ToolSafetyAnalysis {
   whatItCanDo: string[];
   certifications: VendorComplianceCertification[];
   threatVectors: ThreatVector[];
-  trainsOnCustomerData: boolean;
+  // null means the vendor claim has not yet been verified from evidence.
+  trainsOnCustomerData: boolean | null;
   dataRetentionPolicy: string;
   recommendedDecision: ToolDecisionStatus;
   decisionReasoning: string;

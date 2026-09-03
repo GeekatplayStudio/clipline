@@ -4,8 +4,10 @@ node_modules/
 .pnp.js
 
 # Testing and Coverage
-coverage/
-reports/
+/coverage/
+/reports/
+/playwright-report/
+/test-results/
 .stryker-tmp/
 
 # Production Build Artifacts

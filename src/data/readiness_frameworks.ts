@@ -43,7 +43,8 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'Clause 7.2 & 7.3',
         name: 'Competence & Awareness',
-        description: 'Mandatory proof that persons doing work under organizational control are competent and aware of AI risks.',
+        description:
+          'Mandatory proof that persons doing work under organizational control are competent and aware of AI risks.',
         hook: 'This is the education and training mandate: tracked, role-specific certifications.',
       },
       {
@@ -56,11 +57,36 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
     executiveLine:
       '"42001 is where training stops being a nice-to-have. Clause 7.2 is competence and 7.3 is awareness — when an auditor arrives, the only acceptable evidence is documented, tracked, role-specific training. That is exactly the artifact our registry and LMS produces. We build tracking to be audit-ready from day one, because retrofitting evidence is miserable."',
     milestones: [
-      { id: 'm1', label: 'AI Management System (AIMS) scope defined across all LOBs', completed: true, clauseRef: 'Clause 4.3' },
-      { id: 'm2', label: 'ServiceNow AI Workflow inventory operational (u_ai_workflow_registry)', completed: true, clauseRef: 'Clause 6.2.2' },
-      { id: 'm3', label: 'Acceptable Use training assigned via LMS with verifiable completion', completed: true, clauseRef: 'Clause 7.3' },
-      { id: 'm4', label: 'Role-based proficiency assessments for citizen developers (Tier 3 Builder)', completed: false, clauseRef: 'Clause 7.2' },
-      { id: 'm5', label: 'Internal pre-audit against ISO/IEC 42006 accreditation criteria', completed: false, clauseRef: 'Clause 9.2' },
+      {
+        id: 'm1',
+        label: 'AI Management System (AIMS) scope defined across all LOBs',
+        completed: true,
+        clauseRef: 'Clause 4.3',
+      },
+      {
+        id: 'm2',
+        label: 'ServiceNow AI Workflow inventory operational (u_ai_workflow_registry)',
+        completed: true,
+        clauseRef: 'Clause 6.2.2',
+      },
+      {
+        id: 'm3',
+        label: 'Acceptable Use training assigned via LMS with verifiable completion',
+        completed: true,
+        clauseRef: 'Clause 7.3',
+      },
+      {
+        id: 'm4',
+        label: 'Role-based proficiency assessments for citizen developers (Tier 3 Builder)',
+        completed: false,
+        clauseRef: 'Clause 7.2',
+      },
+      {
+        id: 'm5',
+        label: 'Internal pre-audit against ISO/IEC 42006 accreditation criteria',
+        completed: false,
+        clauseRef: 'Clause 9.2',
+      },
     ],
     auditArtifacts: [
       'Executive-approved Enterprise AI Acceptable Use Policy v1.4',
@@ -95,35 +121,59 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'GOVERN',
         name: 'Leadership, Culture & Competence',
-        description: 'Cultivating risk culture, workforce competence (GOVERN-3/4), accountability, and vendor risk.',
+        description:
+          'Cultivating risk culture, workforce competence (GOVERN-3/4), accountability, and vendor risk.',
         hook: 'Training lives directly inside GOVERN. People competence is an explicit control.',
       },
       {
         ref: 'MAP',
         name: 'Context & Categorization',
-        description: 'Establishing context: what AI systems exist, who is affected, intended use, and potential negative impacts.',
+        description:
+          'Establishing context: what AI systems exist, who is affected, intended use, and potential negative impacts.',
         hook: 'The citizen developer registry is the primary enterprise MAP inventory artifact.',
       },
       {
         ref: 'MEASURE',
         name: 'Testing, Evaluation & Tracking',
-        description: 'Qualitative and quantitative metrics for trustworthiness, risk exposure, and effectiveness.',
+        description:
+          'Qualitative and quantitative metrics for trustworthiness, risk exposure, and effectiveness.',
         hook: 'Literacy assessment scores and periodic reattestation rates provide verified MEASURE outputs.',
       },
       {
         ref: 'MANAGE',
         name: 'Risk Prioritization & Response',
-        description: 'Applying guardrails, allocation of resources, incident response, and continuous treatment.',
+        description:
+          'Applying guardrails, allocation of resources, incident response, and continuous treatment.',
         hook: 'Automated 4-tier risk routing and auto-decline of prohibited Tier 4 workflows.',
       },
     ],
     executiveLine:
       '"The RMF gives us the taxonomy. Where my role plugs in is GOVERN — workforce competence and risk culture are named outcomes in that function, not afterthoughts — and MAP, because a citizen developer registry is genuinely an AI system inventory. If we\'re not registering what people build, our MAP function has a hole in it and nobody knows how big."',
     milestones: [
-      { id: 'n1', label: 'Four core functions (G-M-M-M) mapped to Upbound operating model', completed: true, clauseRef: 'Core Functions' },
-      { id: 'n2', label: 'NIST AI 600-1 GenAI Profile risks integrated into intake classification', completed: true, clauseRef: 'Profile 600-1' },
-      { id: 'n3', label: 'Trustworthiness characteristics checklist added to intake wizard', completed: true, clauseRef: 'Section 1.2' },
-      { id: 'n4', label: 'RMF Playbook suggested actions cataloged for citizen developer support', completed: false, clauseRef: 'Playbook Ops' },
+      {
+        id: 'n1',
+        label: 'Four core functions (G-M-M-M) mapped to Upbound operating model',
+        completed: true,
+        clauseRef: 'Core Functions',
+      },
+      {
+        id: 'n2',
+        label: 'NIST AI 600-1 GenAI Profile risks integrated into intake classification',
+        completed: true,
+        clauseRef: 'Profile 600-1',
+      },
+      {
+        id: 'n3',
+        label: 'Trustworthiness characteristics checklist added to intake wizard',
+        completed: true,
+        clauseRef: 'Section 1.2',
+      },
+      {
+        id: 'n4',
+        label: 'RMF Playbook suggested actions cataloged for citizen developer support',
+        completed: false,
+        clauseRef: 'Playbook Ops',
+      },
     ],
     auditArtifacts: [
       'NIST AI RMF 1.0 Function Crosswalk Spreadsheet',
@@ -157,29 +207,52 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'Article 4',
         name: 'Workforce AI Literacy',
-        description: 'Legal mandate requiring organizations to ensure staff possess technical knowledge, education, and context-specific training.',
+        description:
+          'Legal mandate requiring organizations to ensure staff possess technical knowledge, education, and context-specific training.',
         hook: 'The legal foundation of this entire job description — active since Feb 2025.',
       },
       {
         ref: 'Article 50',
         name: 'Transparency Duties',
-        description: 'Mandatory disclosure when customers interact with chatbots or consume AI-generated media.',
+        description:
+          'Mandatory disclosure when customers interact with chatbots or consume AI-generated media.',
         hook: 'Enforced via intake wizard output audience classification ("Customer-facing").',
       },
       {
         ref: 'Annex III',
         name: 'High-Risk Systems (Dec 2027)',
-        description: 'Stringent conformity assessments and logging for credit scoring and employment decisions.',
+        description:
+          'Stringent conformity assessments and logging for credit scoring and employment decisions.',
         hook: 'Upbound Tier 3 & Tier 4 classifications preemptively enforce Annex III requirements.',
       },
     ],
     executiveLine:
-      '"The Act doesn\'t bind Upbound directly on today\'s footprint, but Article 4 is worth knowing because it\'s the first time a regulator has written AI literacy into law as an obligation of the deploying organization, not the vendor. If I build role-based literacy standards that would satisfy an Article 4 review, we\'re ahead of whatever the U.S. equivalent turns out to be, and we\'re not rebuilding in two years."',
+      "\"The Act doesn't bind Upbound directly on today's footprint, but Article 4 is worth knowing because it's the first time a regulator has written AI literacy into law as an obligation of the deploying organization, not the vendor. If I build role-based literacy standards that would satisfy an Article 4 review, we're ahead of whatever the U.S. equivalent turns out to be, and we're not rebuilding in two years.\"",
     milestones: [
-      { id: 'e1', label: 'Article 4 Literacy Curriculum structured into 3 distinct tiers', completed: true, clauseRef: 'Article 4' },
-      { id: 'e2', label: 'Prohibited AI practices hard-blocked in Registry intake logic', completed: true, clauseRef: 'Article 5' },
-      { id: 'e3', label: 'Chatbot and generated content disclosure standards established', completed: true, clauseRef: 'Article 50' },
-      { id: 'e4', label: 'Deployer human-in-the-loop oversight cadence tracking', completed: true, clauseRef: 'Article 26' },
+      {
+        id: 'e1',
+        label: 'Article 4 Literacy Curriculum structured into 3 distinct tiers',
+        completed: true,
+        clauseRef: 'Article 4',
+      },
+      {
+        id: 'e2',
+        label: 'Prohibited AI practices hard-blocked in Registry intake logic',
+        completed: true,
+        clauseRef: 'Article 5',
+      },
+      {
+        id: 'e3',
+        label: 'Chatbot and generated content disclosure standards established',
+        completed: true,
+        clauseRef: 'Article 50',
+      },
+      {
+        id: 'e4',
+        label: 'Deployer human-in-the-loop oversight cadence tracking',
+        completed: true,
+        clauseRef: 'Article 26',
+      },
     ],
     auditArtifacts: [
       'Article 4 AI Literacy Standard Curriculum Syllabus',
@@ -219,23 +292,45 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'CFPB UDAAP',
         name: 'Unfair, Deceptive, or Abusive Practices',
-        description: 'Catch-all regulatory authority for misleading customer communications or automated collections.',
+        description:
+          'Catch-all regulatory authority for misleading customer communications or automated collections.',
         hook: 'Intake wizard flags customer-facing collections workflows for mandatory Legal/GC review.',
       },
       {
         ref: 'SR 11-7',
         name: 'Model Risk Management',
-        description: 'Supervisory guidance on model development, implementation, use, and effective challenge.',
+        description:
+          'Supervisory guidance on model development, implementation, use, and effective challenge.',
         hook: 'Provides the formal validation standard separating simple prompt aids from governed financial models.',
       },
     ],
     executiveLine:
-      '"The thing that makes this a regulated-industry training problem rather than a generic one is adverse action. Under Reg B you owe a customer specific principal reasons for a denial. If a citizen developer builds a workflow that touches underwriting or collections, we\'ve quietly created an explainability requirement they probably don\'t know exists. That\'s precisely why the registry captures what decision the workflow touches, not just what tool it uses."',
+      "\"The thing that makes this a regulated-industry training problem rather than a generic one is adverse action. Under Reg B you owe a customer specific principal reasons for a denial. If a citizen developer builds a workflow that touches underwriting or collections, we've quietly created an explainability requirement they probably don't know exists. That's precisely why the registry captures what decision the workflow touches, not just what tool it uses.\"",
     milestones: [
-      { id: 'f1', label: 'Intake Wizard requires explicit decision influence declaration', completed: true, clauseRef: 'Reg B § 1002.9' },
-      { id: 'f2', label: 'Automatic Tier 4 flag on credit underwriting or customer financial data', completed: true, clauseRef: 'CFPB Circular 2022-03' },
-      { id: 'f3', label: 'Mandatory Human-in-the-Loop review cadence validation', completed: true, clauseRef: 'SR 11-7 Guidance' },
-      { id: 'f4', label: 'Disparate impact & proxy variable training module for financial analysts', completed: false, clauseRef: 'ECOA § 1002.4' },
+      {
+        id: 'f1',
+        label: 'Intake Wizard requires explicit decision influence declaration',
+        completed: true,
+        clauseRef: 'Reg B § 1002.9',
+      },
+      {
+        id: 'f2',
+        label: 'Automatic Tier 4 flag on credit underwriting or customer financial data',
+        completed: true,
+        clauseRef: 'CFPB Circular 2022-03',
+      },
+      {
+        id: 'f3',
+        label: 'Mandatory Human-in-the-Loop review cadence validation',
+        completed: true,
+        clauseRef: 'SR 11-7 Guidance',
+      },
+      {
+        id: 'f4',
+        label: 'Disparate impact & proxy variable training module for financial analysts',
+        completed: false,
+        clauseRef: 'ECOA § 1002.4',
+      },
     ],
     auditArtifacts: [
       'Adverse Action Compliance Checklist for Citizen Workflows',
@@ -269,13 +364,15 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'Table Schema',
         name: 'u_ai_workflow_registry',
-        description: 'Underlying data table storing workflow IDs, risk tiers, review dates, and tool telemetry.',
+        description:
+          'Underlying data table storing workflow IDs, risk tiers, review dates, and tool telemetry.',
         hook: 'Complete 1-to-1 parity with this prototype data model.',
       },
       {
         ref: 'Record Producer',
         name: 'AI Workflow Intake Form',
-        description: 'Low-friction form converting plain-English employee descriptions into classified records.',
+        description:
+          'Low-friction form converting plain-English employee descriptions into classified records.',
         hook: 'Calculates risk tier mathematically behind the scenes rather than asking users to self-classify.',
       },
       {
@@ -286,12 +383,32 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       },
     ],
     executiveLine:
-      '"What I care about isn\'t the platform, it\'s the form design. Intake forms fail when they ask for things the requester doesn\'t know how to answer. If we ask a merchandising analyst to classify their own data sensitivity, we\'ll get garbage. The form asks \'what are you trying to do\' and lets the logic derive the risk tier. Then training and intake reinforce each other — you learn the categories in the module, and the form uses the exact same words."',
+      "\"What I care about isn't the platform, it's the form design. Intake forms fail when they ask for things the requester doesn't know how to answer. If we ask a merchandising analyst to classify their own data sensitivity, we'll get garbage. The form asks 'what are you trying to do' and lets the logic derive the risk tier. Then training and intake reinforce each other — you learn the categories in the module, and the form uses the exact same words.\"",
     milestones: [
-      { id: 's1', label: 'ServiceNow schema u_ai_workflow_registry fully specified', completed: true, clauseRef: 'CMDB Spec' },
-      { id: 's2', label: '4-Tier conditional risk evaluation algorithm verified (PRD Section 4)', completed: true, clauseRef: 'Intake Engine' },
-      { id: 's3', label: 'CSV and JSON export modules formatted for ServiceNow bulk import', completed: true, clauseRef: 'Import Set' },
-      { id: 's4', label: 'Automated reattestation notification flow designed in Flow Designer', completed: true, clauseRef: 'Scheduled Job' },
+      {
+        id: 's1',
+        label: 'ServiceNow schema u_ai_workflow_registry fully specified',
+        completed: true,
+        clauseRef: 'CMDB Spec',
+      },
+      {
+        id: 's2',
+        label: '4-Tier conditional risk evaluation algorithm verified (PRD Section 4)',
+        completed: true,
+        clauseRef: 'Intake Engine',
+      },
+      {
+        id: 's3',
+        label: 'CSV and JSON export modules formatted for ServiceNow bulk import',
+        completed: true,
+        clauseRef: 'Import Set',
+      },
+      {
+        id: 's4',
+        label: 'Automated reattestation notification flow designed in Flow Designer',
+        completed: true,
+        clauseRef: 'Scheduled Job',
+      },
     ],
     auditArtifacts: [
       'ServiceNow Table Ingestion Specification (Table Schema v1.0)',
@@ -325,29 +442,52 @@ export const INITIAL_FRAMEWORKS: CertificationFramework[] = [
       {
         ref: 'Tier 1 Aware',
         name: 'All Employees (Retail & Corp)',
-        description: 'Acceptable Use. What you may and may not put into an AI tool. Recognizing hallucinations. Who to ask.',
+        description:
+          'Acceptable Use. What you may and may not put into an AI tool. Recognizing hallucinations. Who to ask.',
         hook: '6-minute job aid and Day One onboarding requirement; completion + scenario check.',
       },
       {
         ref: 'Tier 2 Fluent',
         name: 'Business & Professional Roles',
-        description: 'Effective prompting, verification habits, identifying appropriate workflows, escalation rules.',
+        description:
+          'Effective prompting, verification habits, identifying appropriate workflows, escalation rules.',
         hook: 'Applied exercises for marketing, store ops, and financial analysts.',
       },
       {
         ref: 'Tier 3 Builder',
         name: 'Citizen Developers & Engineers',
-        description: 'Building with AI, data handling, testing, documentation, and mandatory registration duty.',
+        description:
+          'Building with AI, data handling, testing, documentation, and mandatory registration duty.',
         hook: 'Prerequisite for registering automations in ServiceNow; verified through attestation.',
       },
     ],
     executiveLine:
-      '"I built and ran an enterprise LMS at Hughes for eight years. What that taught me is that the platform is never the hard part. The hard part is that completion data is only as good as the population data feeding it. If the HRIS job profiles are messy, your dashboard says 94% complete and it\'s fiction. That\'s why HR partnership isn\'t a side item — it\'s load-bearing. AI literacy must live inside HR\'s existing competency model, not as an isolated training initiative with an eighteen-month shelf life."',
+      "\"I built and ran an enterprise LMS at Hughes for eight years. What that taught me is that the platform is never the hard part. The hard part is that completion data is only as good as the population data feeding it. If the HRIS job profiles are messy, your dashboard says 94% complete and it's fiction. That's why HR partnership isn't a side item — it's load-bearing. AI literacy must live inside HR's existing competency model, not as an isolated training initiative with an eighteen-month shelf life.\"",
     milestones: [
-      { id: 'l1', label: '3-Tier Literacy model defined: Tier 1 Aware, Tier 2 Fluent, Tier 3 Builder', completed: true, clauseRef: 'Competency Model' },
-      { id: 'l2', label: '6-minute Acceptable Use scenario module prototyped for store associates', completed: true, clauseRef: 'Onboarding Module' },
-      { id: 'l3', label: 'HRIS job profile mapping to dynamic learning assignment rules', completed: false, clauseRef: 'HRIS Integration' },
-      { id: 'l4', label: 'xAPI / LRS completion tracking pipeline for sandbox prompt exercises', completed: false, clauseRef: 'xAPI Telemetry' },
+      {
+        id: 'l1',
+        label: '3-Tier Literacy model defined: Tier 1 Aware, Tier 2 Fluent, Tier 3 Builder',
+        completed: true,
+        clauseRef: 'Competency Model',
+      },
+      {
+        id: 'l2',
+        label: '6-minute Acceptable Use scenario module prototyped for store associates',
+        completed: true,
+        clauseRef: 'Onboarding Module',
+      },
+      {
+        id: 'l3',
+        label: 'HRIS job profile mapping to dynamic learning assignment rules',
+        completed: false,
+        clauseRef: 'HRIS Integration',
+      },
+      {
+        id: 'l4',
+        label: 'xAPI / LRS completion tracking pipeline for sandbox prompt exercises',
+        completed: false,
+        clauseRef: 'xAPI Telemetry',
+      },
     ],
     auditArtifacts: [
       'Upbound 3-Tier AI Competency Specification & Proficiency Scale',

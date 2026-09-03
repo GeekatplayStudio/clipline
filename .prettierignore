@@ -1,0 +1,7 @@
+coverage
+dist
+node_modules
+reports
+test-results
+package-lock.json
+*.tsbuildinfo

@@ -16,7 +16,10 @@ function loadEnv() {
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
         const [key, ...rest] = trimmed.split('=');
-        const val = rest.join('=').trim().replace(/^["']|["']$/g, '');
+        const val = rest
+          .join('=')
+          .trim()
+          .replace(/^["']|["']$/g, '');
         if (!process.env[key.trim()]) {
           process.env[key.trim()] = val;
         }
@@ -29,12 +32,11 @@ async function runDirectDeploy() {
   loadEnv();
 
   const token = process.env.HOSTINGER_API_TOKEN;
-  const domain = process.env.HOSTINGER_DOMAIN || 'clipline.xyz';
-  const username = 'u909878422';
+  const domain = process.env.HOSTINGER_DOMAIN;
+  const username = process.env.HOSTINGER_USERNAME;
 
-  if (!token) {
-    console.error('HOSTINGER_API_TOKEN is required in .env');
-    process.exit(1);
+  if (!token || !domain || !username) {
+    throw new Error('HOSTINGER_API_TOKEN, HOSTINGER_DOMAIN, and HOSTINGER_USERNAME are required.');
   }
 
   console.log(`\n========================================`);
@@ -63,8 +65,7 @@ async function runDirectDeploy() {
   console.log('\nStep 3: Requesting upload URL from Hostinger API...');
   let uploadCredentials: { url: string; auth_key: string; rest_auth_key: string } | null = null;
 
-  // Try domain directly, fallback if needed
-  for (const targetDomain of [domain, 'geekatplay.com']) {
+  for (const targetDomain of [domain]) {
     try {
       console.log(`Trying upload-urls for domain: ${targetDomain}...`);
       const res = await fetch('https://developers.hostinger.com/api/hosting/v1/files/upload-urls', {
@@ -120,7 +121,7 @@ async function runDirectDeploy() {
   console.log(`TUS Create Status: ${createRes.status} ${createRes.statusText}`);
   if (createRes.status !== 201 && createRes.status !== 200) {
     const errBody = await createRes.text();
-    console.warn(`Create response: ${errBody}`);
+    throw new Error(`Upload creation failed (${createRes.status}): ${errBody}`);
   }
 
   console.log(`4b. Sending TUS data PATCH...`);
@@ -139,25 +140,28 @@ async function runDirectDeploy() {
 
   console.log(`TUS Patch Status: ${patchRes.status} ${patchRes.statusText}`);
   if (!patchRes.ok && patchRes.status !== 204) {
-    console.warn(`Patch response: ${await patchRes.text()}`);
+    throw new Error(`Upload failed (${patchRes.status}): ${await patchRes.text()}`);
   } else {
     console.log(`✓ app.zip uploaded successfully to server!`);
   }
 
   // 5. Trigger Static Site Deployment
   console.log('\nStep 5: Triggering Hostinger deploy endpoint...');
-  const deployRes = await fetch(`https://developers.hostinger.com/api/hosting/v1/accounts/${username}/websites/${domain}/deploy`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      archive_path: 'app.zip',
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
+  const deployRes = await fetch(
+    `https://developers.hostinger.com/api/hosting/v1/accounts/${username}/websites/${domain}/deploy`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        archive_path: 'app.zip',
+      }),
+      signal: AbortSignal.timeout(30000),
+    }
+  );
 
   console.log(`Deploy Status: ${deployRes.status} ${deployRes.statusText}`);
   const deployBody = await deployRes.text();
@@ -166,8 +170,11 @@ async function runDirectDeploy() {
   if (deployRes.ok) {
     console.log(`\n🎉 SUCCESS! Site has been deployed to https://${domain}/`);
   } else {
-    console.log(`Deploy response note: ${deployBody}`);
+    throw new Error(`Deployment failed (${deployRes.status}): ${deployBody}`);
   }
 }
 
-runDirectDeploy().catch(console.error);
+runDirectDeploy().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

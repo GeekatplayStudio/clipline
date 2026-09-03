@@ -1,7 +1,7 @@
 // src/App.tsx
 // Justification: Top-level application shell orchestrating role state, 3D Web visualization, executive analytics, split cockpit, and ServiceNow modal workflows.
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 // Justification: React framework and lifecycle hooks.
 
 import { workflowStore } from './store/workflow_store.js';
@@ -28,8 +28,11 @@ import { KnowledgeCheck } from './components/quiz/KnowledgeCheck.js';
 import { WorkflowDetailModal } from './components/detail/WorkflowDetailModal.js';
 // Justification: Detailed workflow inspection and Program Lead action modal.
 
-import { RiskNetwork3D } from './components/network3d/RiskNetwork3D.js';
-// Justification: Three.js interactive 3D organizational risk web visualizer.
+const RiskNetwork3D = lazy(() =>
+  import('./components/network3d/RiskNetwork3D.js').then((module) => ({
+    default: module.RiskNetwork3D,
+  }))
+);
 
 import { ExportReportModal } from './components/reports/ExportReportModal.js';
 // Justification: Executive governance export modal for Printable PDF, ServiceNow CSV, and JSON audit manifests.
@@ -67,13 +70,13 @@ export const App: React.FC = () => {
       setWorkflows(workflowStore.getFilteredWorkflows());
 
       // Justification: Keep selected workflow synchronized if it was updated in modal.
-      if (selectedWorkflow) {
-        const updated = workflowStore.getAllWorkflows().find((w) => w.id === selectedWorkflow.id);
-        if (updated) setSelectedWorkflow(updated);
-      }
+      setSelectedWorkflow((selected) => {
+        if (!selected) return null;
+        return workflowStore.getAllWorkflows().find((workflow) => workflow.id === selected.id) ?? null;
+      });
     });
     return unsubscribe;
-  }, [selectedWorkflow]);
+  }, []);
 
   // Justification: Handle role switching from header dropdown.
   const handleRoleChange = (newRole: UserRole) => {
@@ -136,7 +139,8 @@ export const App: React.FC = () => {
                   3D Organizational Risk Web
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Interactive multi-layer enterprise topology. Rotate, zoom, pan, and hover nodes to inspect citizen automations, manager hierarchies, and risk tiers.
+                  Interactive multi-layer enterprise topology. Rotate, zoom, pan, and hover nodes to inspect
+                  citizen automations, manager hierarchies, and risk tiers.
                 </p>
               </div>
               <button
@@ -148,11 +152,20 @@ export const App: React.FC = () => {
               </button>
             </div>
 
-            <RiskNetwork3D
-              workflows={workflows}
-              onSelectWorkflow={(w) => setSelectedWorkflow(w)}
-              onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
-            />
+            <Suspense
+              fallback={
+                <div
+                  className="h-[580px] rounded-2xl bg-slate-900 animate-pulse"
+                  aria-label="Loading risk topology"
+                />
+              }
+            >
+              <RiskNetwork3D
+                workflows={workflows}
+                onSelectWorkflow={(w) => setSelectedWorkflow(w)}
+                onFilterLOB={(lob) => handleFilterChange({ lob })}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -175,21 +188,29 @@ export const App: React.FC = () => {
             metrics={workflowStore.getExecutiveMetrics()}
             workflows={workflows}
             onSelectWorkflow={(w) => setSelectedWorkflow(w)}
-            onFilterLOB={(lob) => handleFilterChange({ lob: lob as any })}
+            onFilterLOB={(lob) => handleFilterChange({ lob })}
+            onFilterStatus={(status) => {
+              handleFilterChange({ status });
+              setActiveView('registry');
+            }}
+            onFilterTier={(tier) => {
+              handleFilterChange({ tier });
+              setActiveView('registry');
+            }}
+            onFilterOverdue={() => {
+              handleFilterChange({ onlyOverdue: true });
+              setActiveView('registry');
+            }}
             onOpenExport={() => setShowExportModal(true)}
           />
         )}
 
         {/* 4. AI Tool Intake & Safety Analysis */}
-        {activeView === 'tools' && (
-          <ToolRequestsPage currentRole={currentRole} />
-        )}
+        {activeView === 'tools' && <ToolRequestsPage currentRole={currentRole} />}
 
         {/* 5. Standards & Certifications */}
         {activeView === 'readiness' && (
-          <CertificationReadinessPage
-            onOpenExport={() => setShowExportModal(true)}
-          />
+          <CertificationReadinessPage onOpenExport={() => setShowExportModal(true)} />
         )}
 
         {/* 6. 4-Step Progressive Intake Wizard */}
@@ -226,12 +247,13 @@ export const App: React.FC = () => {
       <ExportReportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
-        workflows={workflows}
+        workflows={workflowStore.getAllWorkflows()}
       />
 
       {/* Enterprise Footer */}
       <footer className="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 font-mono">
-        Citizen Developer Registry Prototype &middot; Target ServiceNow Ingestion Spec &middot; Upbound Group Standards
+        Citizen Developer Registry Prototype &middot; Target ServiceNow Ingestion Spec &middot; Upbound Group
+        Standards
       </footer>
     </div>
   );

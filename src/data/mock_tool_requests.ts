@@ -31,23 +31,39 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
         'Direct integration with Anthropic Claude 3.5 Sonnet under enterprise terms',
       ],
       certifications: [
-        { name: 'SOC 2 Type II', verified: true, notes: 'Annual audit verified; zero data retention clause active.' },
+        {
+          name: 'SOC 2 Type II',
+          verified: true,
+          notes: 'Annual audit verified; zero data retention clause active.',
+        },
         { name: 'ISO 27001', verified: true, notes: 'Enterprise tenant isolation certified.' },
-        { name: 'ISO 42001 (AIMS)', verified: false, notes: 'Vendor has self-attested alignment but no external audit.' },
-        { name: 'GDPR / CCPA Compliant', verified: true, notes: 'Full DPA with standard contractual clauses executed.' },
+        {
+          name: 'ISO 42001 (AIMS)',
+          verified: false,
+          notes: 'Vendor has self-attested alignment but no external audit.',
+        },
+        {
+          name: 'GDPR / CCPA Compliant',
+          verified: true,
+          notes: 'Full DPA with standard contractual clauses executed.',
+        },
       ],
       threatVectors: [
         {
           category: 'Prompt / Code Leakage',
           severity: 'Medium',
-          description: 'Developers could inadvertently send hardcoded API secrets or database credentials into model context.',
-          mitigation: 'Enforce pre-commit TruffleHog secret scanning and automated secret redaction before telemetry egress.',
+          description:
+            'Developers could inadvertently send hardcoded API secrets or database credentials into model context.',
+          mitigation:
+            'Enforce pre-commit TruffleHog secret scanning and automated secret redaction before telemetry egress.',
         },
         {
           category: 'Software Vulnerabilities',
           severity: 'Medium',
-          description: 'AI-generated code may contain subtle logic bugs, OWASP Top 10 vulnerabilities, or hallucinated npm packages.',
-          mitigation: 'Mandatory peer review and SonarQube static analysis before any AI-generated PR can be merged to main.',
+          description:
+            'AI-generated code may contain subtle logic bugs, OWASP Top 10 vulnerabilities, or hallucinated npm packages.',
+          mitigation:
+            'Mandatory peer review and SonarQube static analysis before any AI-generated PR can be merged to main.',
         },
       ],
       trainsOnCustomerData: false,
@@ -98,7 +114,8 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
         {
           category: 'Hallucination / Confabulation',
           severity: 'Low',
-          description: 'Search answers might synthesize conflicting market figures if citations are not verified.',
+          description:
+            'Search answers might synthesize conflicting market figures if citations are not verified.',
           mitigation: 'Interface enforces mandatory inline citation clicks to verify primary sources.',
         },
       ],
@@ -162,7 +179,8 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
         },
       ],
       trainsOnCustomerData: true,
-      dataRetentionPolicy: 'Transcripts and audio retained on vendor servers for transcription model improvements.',
+      dataRetentionPolicy:
+        'Transcripts and audio retained on vendor servers for transcription model improvements.',
       recommendedDecision: 'Declined',
       decisionReasoning:
         'Otter.ai retains meeting audio on multi-tenant cloud storage and permits data usage for internal algorithm tuning under standard terms. In retail operations where customer credit and account issues are discussed, this creates immediate GLBA and state two-party consent wiretap liability.',
@@ -200,7 +218,11 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
       certifications: [
         { name: 'SOC 2 Type II', verified: false, notes: 'No independent verification available.' },
         { name: 'ISO 27001', verified: false, notes: 'Unverified.' },
-        { name: 'GDPR / CCPA DPA', verified: false, notes: 'No enforceable U.S. commercial enterprise agreement.' },
+        {
+          name: 'GDPR / CCPA DPA',
+          verified: false,
+          notes: 'No enforceable U.S. commercial enterprise agreement.',
+        },
       ],
       threatVectors: [
         {
@@ -213,7 +235,8 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
         {
           category: 'Model Retraining Exposure',
           severity: 'Critical',
-          description: 'Public API inputs may be logged and integrated into subsequent public model checkpoints.',
+          description:
+            'Public API inputs may be logged and integrated into subsequent public model checkpoints.',
           mitigation: 'Strictly prohibited from ingesting proprietary Acima scoring algorithms.',
         },
       ],
@@ -222,9 +245,7 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
       recommendedDecision: 'Declined',
       decisionReasoning:
         'DeepSeek lacks enterprise SOC 2 Type II compliance, enforceable enterprise tenant isolation, and clear contractual indemnification. Ingesting underwriting scripts into foreign-hosted servers represents an unacceptable regulatory risk under FTC and CFPB guidance.',
-      mandatoryGuardrails: [
-        'Use corporate-approved Azure OpenAI or AWS Bedrock Claude instances instead.',
-      ],
+      mandatoryGuardrails: ['Use corporate-approved Azure OpenAI or AWS Bedrock Claude instances instead.'],
       reviewedBy: 'AI Working Group & Cyber Risk Lead',
       reviewedDate: '2026-08-30',
     },
@@ -264,7 +285,8 @@ export const INITIAL_TOOL_REQUESTS: ToolRequest[] = [
           severity: 'High',
           description:
             'Generative imagery models face active copyright class-action litigation regarding training data provenance.',
-          mitigation: 'Prohibit prompts that reference copyrighted artists or competing corporate brand characters.',
+          mitigation:
+            'Prohibit prompts that reference copyrighted artists or competing corporate brand characters.',
         },
         {
           category: 'Public Visibility on Discord',

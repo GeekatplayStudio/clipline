@@ -18,6 +18,11 @@
     font-feature-settings: 'tnum', 'lnum';
   }
 
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
   /* Justification: Clean scrollbars for dense data views. */
   ::-webkit-scrollbar {
     width: 6px;
@@ -32,6 +37,17 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

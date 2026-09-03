@@ -2,9 +2,11 @@
 // Justification: Comprehensive tests covering 3D overlay telemetry, AnalyticsSuite, ConfigurableKPIs, ExportReportModal, and table sorting/search.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createRef } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { workflowStore } from '../store/workflow_store';
 import { NodeDetailOverlay, GraphNodeData, getTierNumber } from '../components/network3d/NodeDetailOverlay';
+import { RiskNetworkViewport } from '../components/network3d/RiskNetworkViewport';
 import { AnalyticsSuite } from '../components/analytics/AnalyticsSuite';
 import { ConfigurableKPIs } from '../components/dashboard/ConfigurableKPIs';
 import { ExportReportModal } from '../components/reports/ExportReportModal';
@@ -22,9 +24,7 @@ describe('Rich UI & 3D Visualization Suite', () => {
   // 1. NodeDetailOverlay
   describe('NodeDetailOverlay Component', () => {
     it('returns null when node or position is null', () => {
-      const { container } = render(
-        <NodeDetailOverlay node={null} position={null} />
-      );
+      const { container } = render(<NodeDetailOverlay node={null} position={null} />);
       expect(container.firstChild).toBeNull();
     });
 
@@ -43,13 +43,7 @@ describe('Rich UI & 3D Visualization Suite', () => {
         trainingLapsed: false,
       };
 
-      render(
-        <NodeDetailOverlay
-          node={node}
-          position={{ x: 100, y: 100 }}
-          onSelectWorkflow={vi.fn()}
-        />
-      );
+      render(<NodeDetailOverlay node={node} position={{ x: 100, y: 100 }} onSelectWorkflow={vi.fn()} />);
 
       expect(screen.getByText('Citizen Developer')).toBeInTheDocument();
       expect(screen.getByText(node.name)).toBeInTheDocument();
@@ -59,7 +53,8 @@ describe('Rich UI & 3D Visualization Suite', () => {
     });
 
     it('renders tier 4 prohibited badge correctly for prohibited workflow', () => {
-      const t4Workflow = sampleWorkflows.find((w) => w.risk_tier === 'Tier 4 Prohibited') || sampleWorkflows[0];
+      const t4Workflow =
+        sampleWorkflows.find((w) => w.risk_tier === 'Tier 4 Prohibited') || sampleWorkflows[0];
       const node: GraphNodeData = {
         id: `emp-${t4Workflow.id}`,
         name: t4Workflow.owner_name,
@@ -68,12 +63,7 @@ describe('Rich UI & 3D Visualization Suite', () => {
         riskTier: 4,
       };
 
-      render(
-        <NodeDetailOverlay
-          node={node}
-          position={{ x: 200, y: 200 }}
-        />
-      );
+      render(<NodeDetailOverlay node={node} position={{ x: 200, y: 200 }} />);
 
       expect(screen.getByText('Tier 4 Prohibited')).toBeInTheDocument();
     });
@@ -89,17 +79,43 @@ describe('Rich UI & 3D Visualization Suite', () => {
         riskTier: 1,
       };
 
-      render(
-        <NodeDetailOverlay
-          node={node}
-          position={{ x: 150, y: 150 }}
-          onSelectWorkflow={onSelect}
-        />
-      );
+      render(<NodeDetailOverlay node={node} position={{ x: 150, y: 150 }} onSelectWorkflow={onSelect} />);
 
       const inspectBtn = screen.getByText(/Inspect in Registry/i);
       fireEvent.click(inspectBtn);
       expect(onSelect).toHaveBeenCalledWith(workflow);
+    });
+  });
+
+  describe('RiskNetworkViewport Component', () => {
+    it('provides accessible workflow navigation and working controls without WebGL', () => {
+      const onSelectWorkflow = vi.fn();
+      const onToggleAutoRotate = vi.fn();
+      const onToggleFullscreen = vi.fn();
+      const workflow = sampleWorkflows[0];
+
+      render(
+        <RiskNetworkViewport
+          containerRef={createRef<HTMLDivElement>()}
+          workflows={[workflow]}
+          hoveredNode={null}
+          hoverPos={null}
+          autoRotate={true}
+          isFullscreen={false}
+          onSelectWorkflow={onSelectWorkflow}
+          onToggleAutoRotate={onToggleAutoRotate}
+          onToggleFullscreen={onToggleFullscreen}
+        />
+      );
+
+      expect(screen.getByRole('img', { name: /containing 1 workflows/i })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: new RegExp(workflow.id) }));
+      fireEvent.click(screen.getByRole('button', { name: /orbit/i }));
+      fireEvent.click(screen.getByTitle('Toggle Fullscreen'));
+
+      expect(onSelectWorkflow).toHaveBeenCalledWith(workflow);
+      expect(onToggleAutoRotate).toHaveBeenCalledOnce();
+      expect(onToggleFullscreen).toHaveBeenCalledOnce();
     });
   });
 
@@ -207,11 +223,11 @@ describe('Rich UI & 3D Visualization Suite', () => {
 
       // Click Prohibited Card
       fireEvent.click(screen.getByText('Prohibited'));
-      expect(onFilterTier).toHaveBeenCalledWith(4);
+      expect(onFilterTier).toHaveBeenCalledWith('Tier 4 Prohibited');
 
       // Click High Risk Card
       fireEvent.click(screen.getByText('High Risk'));
-      expect(onFilterTier).toHaveBeenCalledWith(3);
+      expect(onFilterTier).toHaveBeenCalledWith('Tier 3 High');
     });
   });
 
@@ -228,11 +244,11 @@ describe('Rich UI & 3D Visualization Suite', () => {
       const onClose = vi.fn();
       // Mock window.URL and window.print
       window.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+      window.URL.revokeObjectURL = vi.fn();
       window.print = vi.fn();
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
-      render(
-        <ExportReportModal isOpen={true} onClose={onClose} workflows={sampleWorkflows} />
-      );
+      render(<ExportReportModal isOpen={true} onClose={onClose} workflows={sampleWorkflows} />);
 
       expect(screen.getByText('Export Executive Governance Briefing')).toBeInTheDocument();
       expect(screen.getByText('Printable Executive PDF')).toBeInTheDocument();
@@ -254,6 +270,8 @@ describe('Rich UI & 3D Visualization Suite', () => {
       // Click Close
       fireEvent.click(screen.getByText('Close'));
       expect(onClose).toHaveBeenCalled();
+      expect(window.URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+      clickSpy.mockRestore();
     });
   });
 

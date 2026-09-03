@@ -2,6 +2,7 @@
 // Justification: In-depth AI safety, certification audit, threat vector, and governance decision analysis dossier for evaluated tools.
 
 import React, { useState } from 'react';
+import { useDialog } from '../../hooks/useDialog';
 import { ToolRequest, ToolDecisionStatus } from '../../types/tool_request.js';
 import { UserRole } from '../../types/workflow.js';
 import {
@@ -32,6 +33,7 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
   onClose,
   onUpdateDecision,
 }) => {
+  const dialogRef = useDialog(onClose);
   const [leadComments, setLeadComments] = useState(toolRequest.officialComments || '');
   const [selectedDecision, setSelectedDecision] = useState<ToolDecisionStatus>(toolRequest.status);
 
@@ -68,7 +70,14 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tool-analysis-title"
+        tabIndex={-1}
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-start justify-between">
           <div className="space-y-1">
@@ -79,22 +88,29 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
               <span className="text-xs px-2.5 py-0.5 rounded-full font-bold border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                 {toolRequest.category}
               </span>
-              <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${getStatusBadge(selectedDecision)}`}>
+              <span
+                className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${getStatusBadge(selectedDecision)}`}
+              >
                 {selectedDecision}
               </span>
             </div>
 
-            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h3
+              id="tool-analysis-title"
+              className="text-xl font-black text-slate-900 dark:text-white tracking-tight"
+            >
               {toolRequest.toolName}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Vendor: <strong>{toolRequest.vendor}</strong> &bull; Tenant Model: {toolRequest.dataHandlingModel}
+              Vendor: <strong>{toolRequest.vendor}</strong> &bull; Tenant Model:{' '}
+              {toolRequest.dataHandlingModel}
             </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close tool analysis"
             className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -107,19 +123,32 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-blue-500" />
-              <span><strong>Requester:</strong> {toolRequest.requesterName}</span>
+              <span>
+                <strong>Requester:</strong> {toolRequest.requesterName}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-emerald-500" />
-              <span><strong>LOB:</strong> {toolRequest.lob} ({toolRequest.department})</span>
+              <span>
+                <strong>LOB:</strong> {toolRequest.lob} ({toolRequest.department})
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-amber-500" />
-              <span><strong>Requested:</strong> {toolRequest.requestedDate}</span>
+              <span>
+                <strong>Requested:</strong> {toolRequest.requestedDate}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-purple-500" />
-              <span><strong>Model Training:</strong> {safetyAnalysis.trainsOnCustomerData ? '⚠️ Yes (Opt-in)' : '✓ Zero Training'}</span>
+              <span>
+                <strong>Model Training:</strong>{' '}
+                {safetyAnalysis.trainsOnCustomerData === null
+                  ? 'Unverified'
+                  : safetyAnalysis.trainsOnCustomerData
+                    ? '⚠️ Yes'
+                    : 'No — verified claim required'}
+              </span>
             </div>
           </div>
 
@@ -174,9 +203,7 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
                 <span className="font-bold text-slate-800 dark:text-slate-200 block text-xs">
                   Overall Risk: {safetyAnalysis.riskLevel}
                 </span>
-                <span className="text-[11px] text-slate-500">
-                  {safetyAnalysis.dataRetentionPolicy}
-                </span>
+                <span className="text-[11px] text-slate-500">{safetyAnalysis.dataRetentionPolicy}</span>
               </div>
             </div>
 
@@ -259,10 +286,10 @@ export const ToolAnalysisModal: React.FC<ToolAnalysisModalProps> = ({
                         threat.severity === 'Critical'
                           ? 'bg-rose-500 text-white'
                           : threat.severity === 'High'
-                          ? 'bg-amber-500 text-white'
-                          : threat.severity === 'Medium'
-                          ? 'bg-yellow-400 text-slate-900'
-                          : 'bg-slate-200 text-slate-700'
+                            ? 'bg-amber-500 text-white'
+                            : threat.severity === 'Medium'
+                              ? 'bg-yellow-400 text-slate-900'
+                              : 'bg-slate-200 text-slate-700'
                       }`}
                     >
                       Severity: {threat.severity}

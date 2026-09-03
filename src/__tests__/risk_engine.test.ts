@@ -4,11 +4,7 @@
 import { describe, it, expect } from 'vitest';
 // Justification: Vitest testing assertions and test suite blocks.
 
-import {
-  evaluateRiskTier,
-  calculateReviewDueDate,
-  getEducationalCallout,
-} from '../engine/risk_engine.js';
+import { evaluateRiskTier, calculateReviewDueDate, getEducationalCallout } from '../engine/risk_engine.js';
 // Justification: Import target functions under test.
 
 import { WorkflowIntakeFormData } from '../types/workflow.js';
@@ -28,7 +24,9 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     const result = evaluateRiskTier(input);
 
     expect(result.tier).toBe('Tier 4 Prohibited');
-    expect(result.reason).toContain('influences customer credit/underwriting decisions with a non-vendor custom implementation');
+    expect(result.reason).toBe(
+      'Tier 4 — Prohibited pending review. This workflow influences customer credit/underwriting decisions with a non-vendor custom implementation. Absent an explicit AI Working Group exception, this workflow is presumed declined.'
+    );
     expect(result.routeTo).toBe('AI Working Group; presumed declined absent explicit exception');
     expect(result.reviewCadenceMonths).toBe(3);
     expect(result.requiresSpecialCallout).toBe(true);
@@ -45,7 +43,9 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     const result = evaluateRiskTier(input);
 
     expect(result.tier).toBe('Tier 4 Prohibited');
-    expect(result.reason).toContain('transmits sensitive credit or underwriting data outside enterprise tenant boundaries');
+    expect(result.reason).toBe(
+      'Tier 4 — Prohibited pending review. This workflow transmits sensitive credit or underwriting data outside enterprise tenant boundaries. Absent an explicit AI Working Group exception, this workflow is presumed declined.'
+    );
   });
 
   it('triggers Tier 4 with combined reasoning when BOTH credit decision and credit data egress occur', () => {
@@ -58,8 +58,9 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     const result = evaluateRiskTier(input);
 
     expect(result.tier).toBe('Tier 4 Prohibited');
-    expect(result.reason).toContain('influences customer credit/underwriting decisions with a non-vendor custom implementation');
-    expect(result.reason).toContain('transmits sensitive credit or underwriting data outside enterprise tenant boundaries');
+    expect(result.reason).toBe(
+      'Tier 4 — Prohibited pending review. This workflow influences customer credit/underwriting decisions with a non-vendor custom implementation and transmits sensitive credit or underwriting data outside enterprise tenant boundaries. Absent an explicit AI Working Group exception, this workflow is presumed declined.'
+    );
   });
 
   it('does NOT trigger Tier 4 if credit decision is made through an approved Vendor AI feature without data egress', () => {
@@ -154,6 +155,29 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     expect(result.reason).toContain('sends confidential/employee data outside enterprise boundaries');
   });
 
+  it('distinguishes in-tenant credit data from prohibited external transmission', () => {
+    const result = evaluateRiskTier({
+      data_categories: ['Credit or underwriting data'],
+      decision_influence: 'No decision — informational only',
+      data_leaves_tenant: false,
+      output_audience: 'My team',
+      human_review: 'Every output reviewed',
+    });
+    expect(result.tier).toBe('Tier 3 High');
+    expect(result.reason).toContain('touches Credit or underwriting data');
+  });
+
+  it('does not elevate non-sensitive tenant egress without another trigger', () => {
+    const result = evaluateRiskTier({
+      data_categories: ['Internal non-sensitive'],
+      decision_influence: 'No decision — informational only',
+      data_leaves_tenant: true,
+      output_audience: 'My team',
+      human_review: 'Every output reviewed',
+    });
+    expect(result.tier).toBe('Tier 1 Low');
+  });
+
   // =========================================================================
   // TIER 2 MODERATE TESTS
   // =========================================================================
@@ -168,7 +192,9 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     const result = evaluateRiskTier(input);
 
     expect(result.tier).toBe('Tier 2 Moderate');
-    expect(result.reason).toBe('Tier 2 — Moderate. This workflow touches sensitive internal data (Internal confidential). Requires Program Lead review.');
+    expect(result.reason).toBe(
+      'Tier 2 — Moderate. This workflow touches sensitive internal data (Internal confidential). Requires Program Lead review.'
+    );
     expect(result.routeTo).toBe('Program lead review');
     expect(result.reviewCadenceMonths).toBe(6);
     expect(result.requiresSpecialCallout).toBe(false);
@@ -259,6 +285,25 @@ describe('Risk Derivation Engine (PRD Section 4 Cascade)', () => {
     const result = calculateReviewDueDate(6);
     expect(typeof result).toBe('string');
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('classifies employee data retained in-tenant as Tier 2', () => {
+    const result = evaluateRiskTier({
+      data_categories: ['Employee data'],
+      data_leaves_tenant: false,
+      output_audience: 'My team',
+      human_review: 'Every output reviewed',
+    });
+    expect(result.tier).toBe('Tier 2 Moderate');
+    expect(result.reason).toContain('(Employee data)');
+  });
+
+  it('clamps month-end dates and rejects invalid cadences', () => {
+    expect(calculateReviewDueDate(1, new Date('2024-01-31T00:00:00Z'))).toBe('2024-02-29');
+    expect(calculateReviewDueDate(1, new Date('2025-01-31T00:00:00Z'))).toBe('2025-02-28');
+    expect(calculateReviewDueDate(0, new Date('2025-01-31T00:00:00Z'))).toBe('2025-01-31');
+    expect(() => calculateReviewDueDate(-1)).toThrow('cadenceMonths must be a non-negative integer');
+    expect(() => calculateReviewDueDate(1.5)).toThrow(RangeError);
   });
 
   // =========================================================================

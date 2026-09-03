@@ -5,10 +5,7 @@ export default {
   // Justification: Enables class-based dark mode toggling if needed in enterprise environments.
   darkMode: ['class'],
   // Justification: Configures content purge paths covering all React components and index.html.
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       // Justification: Extends colors with muted enterprise tiers (slate -> amber -> rust -> deep red).

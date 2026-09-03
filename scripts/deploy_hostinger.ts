@@ -4,7 +4,13 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
+
+interface HostingerSite {
+  domain: string;
+  root_directory?: string;
+  username?: string;
+}
 
 function loadEnv() {
   const envPath = path.resolve(process.cwd(), '.env');
@@ -14,7 +20,10 @@ function loadEnv() {
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
         const [key, ...rest] = trimmed.split('=');
-        const val = rest.join('=').trim().replace(/^["']|["']$/g, '');
+        const val = rest
+          .join('=')
+          .trim()
+          .replace(/^["']|["']$/g, '');
         if (!process.env[key.trim()]) {
           process.env[key.trim()] = val;
         }
@@ -34,8 +43,8 @@ async function verifyHostingerStatus(token: string, domain: string) {
     });
 
     if (response.ok) {
-      const json = await response.json();
-      const site = json.data?.find((w: any) => w.domain === domain);
+      const json = (await response.json()) as { data?: HostingerSite[] };
+      const site = json.data?.find((website) => website.domain === domain);
       if (site) {
         console.log(`✓ Confirmed website ${domain} active on Hostinger account.`);
         console.log(`  Root Directory: ${site.root_directory}`);
@@ -61,6 +70,10 @@ function deployToGitBranch() {
   // Step 2: Push dist to deploy branch
   console.log('\nStep 2: Preparing static assets deployment branch...');
   const tempDir = path.join(os.tmpdir(), `deploy-${Date.now()}`);
+  const repositoryUrl = process.env.DEPLOY_REPOSITORY_URL;
+  if (!repositoryUrl) {
+    throw new Error('DEPLOY_REPOSITORY_URL is required. No deployment repository is assumed.');
+  }
   fs.mkdirSync(tempDir, { recursive: true });
 
   const distDir = path.resolve(process.cwd(), 'dist');
@@ -70,11 +83,17 @@ function deployToGitBranch() {
 
   try {
     execSync('git init', { cwd: tempDir, stdio: 'ignore' });
-    execSync('git remote add origin https://github.com/GeekatplayStudio/clipline.git', { cwd: tempDir, stdio: 'ignore' });
+    execFileSync('git', ['remote', 'add', 'origin', repositoryUrl], { cwd: tempDir, stdio: 'ignore' });
     execSync('git checkout -b deploy', { cwd: tempDir, stdio: 'ignore' });
     execSync('git add .', { cwd: tempDir, stdio: 'ignore' });
-    execSync('git commit -m "deploy: automated static build for Hostinger"', { cwd: tempDir, stdio: 'ignore' });
+    execSync('git commit -m "deploy: automated static build for Hostinger"', {
+      cwd: tempDir,
+      stdio: 'ignore',
+    });
     console.log('Pushing production build to GitHub deploy branch...');
+    if (process.env.ALLOW_FORCE_DEPLOY !== 'true') {
+      throw new Error('Refusing to replace the deploy branch without ALLOW_FORCE_DEPLOY=true.');
+    }
     execSync('git push origin deploy --force', { cwd: tempDir, stdio: 'inherit' });
     console.log('✓ Successfully pushed to GitHub "deploy" branch!');
   } finally {
@@ -85,7 +104,11 @@ function deployToGitBranch() {
 async function main() {
   loadEnv();
   const token = process.env.HOSTINGER_API_TOKEN;
-  const domain = process.env.HOSTINGER_DOMAIN || 'clipline.xyz';
+  const domain = process.env.HOSTINGER_DOMAIN;
+
+  if (!domain) {
+    throw new Error('HOSTINGER_DOMAIN is required.');
+  }
 
   if (token) {
     await verifyHostingerStatus(token, domain);
@@ -98,10 +121,13 @@ async function main() {
   console.log('========================================');
   console.log(`Domain: https://${domain}/`);
   console.log('In Hostinger hPanel -> Advanced -> Git:');
-  console.log('  1. Repository: https://github.com/GeekatplayStudio/clipline.git');
+  console.log(`  1. Repository: ${process.env.DEPLOY_REPOSITORY_URL}`);
   console.log('  2. Branch: deploy');
   console.log('  3. Directory: public_html');
   console.log('========================================\n');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

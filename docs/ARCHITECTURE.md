@@ -1,9 +1,10 @@
 # System Architecture & Technical Specification
+
 ## AI Workflow Registry — Citizen Developer Governance Prototype
 
 **Target Role:** AI Training and Standards Lead, Upbound Group  
-**Framework:** Super Agent Multi-Agent Orchestrator + React 19 / TypeScript / Vite / Tailwind CSS  
-**Positioning Principle:** *"I built this to think through the data model, not to sell you software. Your version lives in ServiceNow."*
+**Framework:** Role-Oriented Verification Harness + React 19 / TypeScript / Vite / Tailwind CSS
+**Positioning Principle:** _"I built this to think through the data model, not to sell you software. Your version lives in ServiceNow."_
 
 ---
 
@@ -11,14 +12,14 @@
 
 ```mermaid
 graph TD
-    subgraph MultiAgentSystem["Super Agent Multi-Agent Framework"]
+    subgraph MultiAgentSystem["Role-Oriented Verification Harness"]
         SuperAgent["Super Agent (Supervisor, Monitor, Retry Engine)"]
         PM["Project Manager Agent"]
         Arch["System Architect Agent"]
         UI["UI/UX Designer Agent"]
         BE["Backend Developer Agent"]
         FE["Frontend Developer Agent"]
-        QA["QA & Test Coverage Agent (100% Target)"]
+        QA["QA & Scoped Coverage Verification"]
         Doc["Technical Writer Agent"]
         Deploy["Deployment Agent"]
 
@@ -54,9 +55,9 @@ graph TD
 
 ---
 
-## 2. Multi-Agent Orchestration Engine (`/agents`)
+## 2. Role-Oriented Verification Harness (`/agents`)
 
-The project is governed by a **Super Agent** supervisor coordinating 8 specialized sub-agents:
+The repository contains a sequential supervisor coordinating eight role definitions. These classes model ownership and record telemetry; they do not call an AI model or autonomously author artifacts. Verification hooks inspect artifacts, execute the Vitest suite, and compile the production bundle.
 
 1. **Super Agent (`super_agent.ts`)**:
    - Maintains an execution journal across all sub-agent steps.
@@ -78,7 +79,7 @@ The project is governed by a **Super Agent** supervisor coordinating 8 specializ
 6. **Frontend Developer (`frontend_developer.ts`)**:
    - Builds responsive, accessible React 19 components with keyboard navigability.
 7. **QA Engineer (`qa_engineer.ts`)**:
-   - Enforces the 100% test coverage threshold on lines, functions, branches, and statements via Vitest.
+   - Executes Vitest and applies scoped core-domain coverage gates: 90% lines/statements/functions and 85% branches.
    - Configures Stryker Mutator to verify fault-injection test resilience.
 8. **Documentation Writer (`doc_writer.ts`)**:
    - Authors the ServiceNow migration blueprint, architecture docs, and 3-minute demo script.
@@ -92,12 +93,14 @@ The project is governed by a **Super Agent** supervisor coordinating 8 specializ
 Risk tiering is **derived**, never self-selected by users. The cascade evaluates top-to-bottom; first match wins:
 
 ### Tier 4 — Prohibited Pending Review
+
 - **Trigger 1**: `decision_influence = "Customer-affecting decision — credit or underwriting"` AND `build_type != "Vendor AI feature"`
 - **Trigger 2**: `data_categories` includes `"Credit or underwriting data"` AND `data_leaves_tenant = true`
 - **Routing**: AI Working Group; presumed declined absent explicit exception.
 - **Review Cadence**: 3 Months.
 
 ### Tier 3 — High
+
 - **Trigger 1**: `data_categories` touches any of `[Customer PII, Customer financial data, Credit/underwriting data]`
 - **Trigger 2**: `decision_influence` starts with `"Customer-affecting"`
 - **Trigger 3**: `data_leaves_tenant = true` AND `data_categories` includes `[Internal confidential, Employee data]`
@@ -105,6 +108,7 @@ Risk tiering is **derived**, never self-selected by users. The cascade evaluates
 - **Review Cadence**: 3 Months.
 
 ### Tier 2 — Moderate
+
 - **Trigger 1**: `data_categories` includes `[Internal confidential, Employee data]`
 - **Trigger 2**: `output_audience = "Internal broad"`
 - **Trigger 3**: `human_review = "None"`
@@ -112,6 +116,7 @@ Risk tiering is **derived**, never self-selected by users. The cascade evaluates
 - **Review Cadence**: 6 Months.
 
 ### Tier 1 — Low (Default)
+
 - **Trigger**: All other non-sensitive, operational internal workflows.
 - **Routing**: Auto-approved and logged.
 - **Review Cadence**: 12 Months.

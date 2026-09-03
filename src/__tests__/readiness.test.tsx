@@ -55,9 +55,7 @@ describe('Certification & Regulatory Readiness Cockpit', () => {
     expect(screen.getAllByText('Clause 6.2.2').length).toBeGreaterThan(0);
 
     // Verify exact quote from the brief
-    expect(
-      screen.getByText(/42001 is where training stops being a nice-to-have/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/42001 is where training stops being a nice-to-have/i)).toBeInTheDocument();
   });
 
   it('allows expanding a different framework card and collapsing the previous one', () => {

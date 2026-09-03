@@ -3,54 +3,105 @@
 
 import { ToolRequest, ToolDecisionStatus, ToolSafetyAnalysis } from '../types/tool_request.js';
 import { INITIAL_TOOL_REQUESTS } from '../data/mock_tool_requests.js';
+import { isToolRequest, parseToolRequestEnvelope, ToolRequestEnvelopeV2 } from './tool_request_schema.js';
 
 type Listener = (requests: ToolRequest[]) => void;
+
+function cloneRequest(request: ToolRequest): ToolRequest {
+  return {
+    ...request,
+    intendedDataSensitivity: [...request.intendedDataSensitivity],
+    safetyAnalysis: {
+      ...request.safetyAnalysis,
+      whatItCanDo: [...request.safetyAnalysis.whatItCanDo],
+      certifications: request.safetyAnalysis.certifications.map((certification) => ({ ...certification })),
+      threatVectors: request.safetyAnalysis.threatVectors.map((threat) => ({ ...threat })),
+      mandatoryGuardrails: [...request.safetyAnalysis.mandatoryGuardrails],
+    },
+  };
+}
+
+function cloneRequests(requests: readonly ToolRequest[]): ToolRequest[] {
+  return requests.map(cloneRequest);
+}
 
 class ToolRequestStore {
   private requests: ToolRequest[] = [];
   private listeners: Set<Listener> = new Set();
-  private readonly storageKey = 'upbound_ai_tool_requests_v1';
+  private readonly storageKey = 'upbound_ai_tool_requests_v2';
+  private readonly legacyStorageKey = 'upbound_ai_tool_requests_v1';
 
   constructor() {
     this.loadInitialData();
   }
 
   private loadInitialData(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        this.requests = JSON.parse(stored);
-        return;
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = window.localStorage.getItem(this.storageKey);
+        if (stored) {
+          const parsed: unknown = JSON.parse(stored);
+          const requests = parseToolRequestEnvelope(parsed);
+          if (requests) {
+            this.requests = cloneRequests(requests);
+            return;
+          }
+        }
+        const legacy = window.localStorage.getItem(this.legacyStorageKey);
+        if (legacy) {
+          const parsed: unknown = JSON.parse(legacy);
+          if (Array.isArray(parsed) && parsed.every(isToolRequest)) {
+            this.requests = cloneRequests(parsed);
+            this.persistEnvelope();
+            window.localStorage.removeItem(this.legacyStorageKey);
+            return;
+          }
+        }
+      } catch {
+        // Invalid, blocked, or outdated browser data must not prevent app loading.
       }
     }
-    this.requests = [...INITIAL_TOOL_REQUESTS];
+    this.requests = cloneRequests(INITIAL_TOOL_REQUESTS);
   }
 
   private save(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.requests));
+    if (typeof window !== 'undefined') {
+      try {
+        this.persistEnvelope();
+      } catch {
+        // Preserve the in-memory session if storage is unavailable or full.
+      }
     }
     this.notify();
   }
 
+  private persistEnvelope(): void {
+    const envelope: ToolRequestEnvelopeV2 = { schemaVersion: 2, requests: this.requests };
+    window.localStorage.setItem(this.storageKey, JSON.stringify(envelope));
+  }
+
   private notify(): void {
-    this.listeners.forEach((l) => l([...this.requests]));
+    this.listeners.forEach((l) => l(cloneRequests(this.requests)));
   }
 
   public subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
-    listener([...this.requests]);
+    listener(cloneRequests(this.requests));
     return () => this.listeners.delete(listener);
   }
 
   public getToolRequests(): ToolRequest[] {
-    return [...this.requests];
+    return cloneRequests(this.requests);
   }
 
   public addToolRequest(
     newRequest: Omit<ToolRequest, 'id' | 'requestedDate' | 'status' | 'safetyAnalysis'>
   ): ToolRequest {
-    const nextId = `TR-${1000 + this.requests.length + 1}`;
+    const maxId = this.requests.reduce((maximum, request) => {
+      const match = /^TR-(\d+)$/.exec(request.id);
+      return match ? Math.max(maximum, Number(match[1])) : maximum;
+    }, 1000);
+    const nextId = `TR-${maxId + 1}`;
     const today = new Date().toISOString().split('T')[0];
 
     // Auto-generate realistic AI Safety Analysis based on input parameters
@@ -71,20 +122,17 @@ class ToolRequestStore {
 
     this.requests = [record, ...this.requests];
     this.save();
-    return record;
+    return cloneRequest(record);
   }
 
-  public updateToolDecision(
-    id: string,
-    newStatus: ToolDecisionStatus,
-    comments?: string
-  ): void {
+  public updateToolDecision(id: string, newStatus: ToolDecisionStatus, comments?: string): boolean {
+    if (!this.requests.some((request) => request.id === id)) return false;
     this.requests = this.requests.map((req) => {
       if (req.id !== id) return req;
       return {
         ...req,
         status: newStatus,
-        officialComments: comments || req.officialComments,
+        officialComments: comments?.trim() || undefined,
         safetyAnalysis: {
           ...req.safetyAnalysis,
           reviewedBy: 'AI Working Group / Program Lead',
@@ -93,12 +141,18 @@ class ToolRequestStore {
       };
     });
     this.save();
+    return true;
   }
 
   public resetToDefault(): void {
-    this.requests = [...INITIAL_TOOL_REQUESTS];
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem(this.storageKey);
+    this.requests = cloneRequests(INITIAL_TOOL_REQUESTS);
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(this.storageKey);
+        window.localStorage.removeItem(this.legacyStorageKey);
+      } catch {
+        // Reset still succeeds in memory when browser storage is unavailable.
+      }
     }
     this.save();
   }
@@ -113,11 +167,15 @@ class ToolRequestStore {
     sensitivities: string[]
   ): ToolSafetyAnalysis {
     let score = 75;
-    const isEnterprise = model.includes('Enterprise');
-    const touchesCredit = sensitivities.some((s) => s.toLowerCase().includes('credit') || s.toLowerCase().includes('underwriting'));
-    const touchesPII = sensitivities.some((s) => s.toLowerCase().includes('pii') || s.toLowerCase().includes('financial'));
+    const claimsEnterpriseControls = model.includes('Enterprise');
+    const touchesCredit = sensitivities.some(
+      (s) => s.toLowerCase().includes('credit') || s.toLowerCase().includes('underwriting')
+    );
+    const touchesPII = sensitivities.some(
+      (s) => s.toLowerCase().includes('pii') || s.toLowerCase().includes('financial')
+    );
 
-    if (isEnterprise) score += 15;
+    if (claimsEnterpriseControls) score += 15;
     else score -= 15;
 
     if (touchesCredit) score -= 40;
@@ -136,9 +194,13 @@ class ToolRequestStore {
         'Natural language generation and productivity acceleration',
       ],
       certifications: [
-        { name: 'SOC 2 Type II', verified: isEnterprise, notes: isEnterprise ? 'Required for corporate approval' : 'Unverified on public consumer tier' },
-        { name: 'ISO 27001', verified: isEnterprise, notes: 'Information security standard' },
-        { name: 'GDPR / CCPA', verified: true, notes: 'Data privacy standard terms apply' },
+        { name: 'SOC 2 Type II', verified: false, notes: 'Unverified: obtain and review the vendor report.' },
+        {
+          name: 'ISO 27001',
+          verified: false,
+          notes: 'Unverified: obtain a current certificate and scope statement.',
+        },
+        { name: 'GDPR / CCPA', verified: false, notes: 'Unverified: legal and privacy review required.' },
       ],
       threatVectors: [
         {
@@ -147,31 +209,29 @@ class ToolRequestStore {
           description: touchesPII
             ? 'Sensitive customer financial or PII data may route through external model inference without adequate tenant guarantees.'
             : 'Operational prompts processed through vendor API endpoints.',
-          mitigation: isEnterprise
-            ? 'Enforce Zero Data Retention agreement and enterprise SSO.'
+          mitigation: claimsEnterpriseControls
+            ? 'Verify Zero Data Retention contract terms and enforce enterprise SSO.'
             : 'Must upgrade to enterprise commercial tier before ingesting company records.',
         },
       ],
-      trainsOnCustomerData: !isEnterprise,
-      dataRetentionPolicy: isEnterprise
-        ? 'Zero Data Retention under Enterprise DPA.'
-        : 'Vendor may retain prompt interactions for platform quality review.',
+      trainsOnCustomerData: null,
+      dataRetentionPolicy: claimsEnterpriseControls
+        ? 'Requester claims enterprise controls; retention terms require evidence review.'
+        : 'Unknown until vendor terms and the applicable service tier are reviewed.',
       recommendedDecision:
-        clampedScore >= 75
-          ? 'Approved with Conditions'
-          : clampedScore >= 50
-          ? 'Under Review'
-          : 'Declined',
+        clampedScore >= 75 ? 'Approved with Conditions' : clampedScore >= 50 ? 'Under Review' : 'Declined',
       decisionReasoning: `Automated assessment calculated a safety score of ${clampedScore}/100. ${
         touchesCredit
           ? 'Warning: Touches underwriting/credit data which carries strict explainability and adverse action restrictions.'
-          : isEnterprise
-          ? 'Enterprise tenant protections offer viable risk isolation.'
-          : 'Multi-tenant consumer cloud deployment poses data leakage concerns.'
+          : claimsEnterpriseControls
+            ? 'Claimed enterprise protections reduce preliminary risk but require evidence verification.'
+            : 'Multi-tenant consumer cloud deployment poses data leakage concerns.'
       }`,
       mandatoryGuardrails: [
         'Adhere to Upbound Group AI Acceptable Use Policy.',
-        touchesPII ? 'Customer PII and bank details strictly prohibited without Data Governance sign-off.' : 'Verify AI output before using in business decisions.',
+        touchesPII
+          ? 'Customer PII and bank details strictly prohibited without Data Governance sign-off.'
+          : 'Verify AI output before using in business decisions.',
       ],
     };
   }

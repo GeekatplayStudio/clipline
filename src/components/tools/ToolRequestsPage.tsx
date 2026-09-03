@@ -7,14 +7,7 @@ import { ToolRequest, ToolDecisionStatus, ToolCategory } from '../../types/tool_
 import { UserRole, LOB } from '../../types/workflow.js';
 import { ToolRequestModal } from './ToolRequestModal.js';
 import { ToolAnalysisModal } from './ToolAnalysisModal.js';
-import {
-  Wrench,
-  PlusCircle,
-  Search,
-  Filter,
-  RotateCcw,
-  ChevronRight,
-} from 'lucide-react';
+import { Wrench, PlusCircle, Search, Filter, RotateCcw, ChevronRight } from 'lucide-react';
 
 interface ToolRequestsPageProps {
   currentRole: UserRole;
@@ -32,13 +25,13 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
   useEffect(() => {
     const unsubscribe = toolRequestStore.subscribe((updated) => {
       setRequests(updated);
-      if (selectedRequest) {
-        const found = updated.find((r) => r.id === selectedRequest.id);
-        if (found) setSelectedRequest(found);
-      }
+      setSelectedRequest((selected) => {
+        if (!selected) return null;
+        return updated.find((request) => request.id === selected.id) ?? null;
+      });
     });
     return () => unsubscribe();
-  }, [selectedRequest]);
+  }, []);
 
   // Compute Metrics
   const metrics = useMemo(() => {
@@ -49,11 +42,7 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
     const underReview = requests.filter((r) => r.status === 'Under Review').length;
     const declined = requests.filter((r) => r.status === 'Declined' || r.status === 'Banned').length;
     const avgScore =
-      total > 0
-        ? Math.round(
-            requests.reduce((sum, r) => sum + r.safetyAnalysis.safetyScore, 0) / total
-          )
-        : 0;
+      total > 0 ? Math.round(requests.reduce((sum, r) => sum + r.safetyAnalysis.safetyScore, 0) / total) : 0;
 
     return { total, approved, underReview, declined, avgScore };
   }, [requests]);
@@ -79,9 +68,12 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
   }, [requests, statusFilter, categoryFilter, lobFilter, searchQuery]);
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300';
-    if (score >= 65) return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/60 dark:text-yellow-300 border-yellow-300';
-    if (score >= 40) return 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300';
+    if (score >= 80)
+      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300';
+    if (score >= 65)
+      return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/60 dark:text-yellow-300 border-yellow-300';
+    if (score >= 40)
+      return 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300';
     return 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300';
   };
 
@@ -119,7 +111,8 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
             AI Tool Intake, Safety Analysis & Certification Audit
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Employee intake pipeline for software and API tools with automated ISO 42001 certification audits and threat vector assessments.
+            Employee intake pipeline for software and API tools with automated ISO 42001 certification audits
+            and threat vector assessments.
           </p>
         </div>
 
@@ -216,7 +209,7 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
             <span className="text-slate-500">Status:</span>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as ToolDecisionStatus | 'All')}
               className="bg-transparent font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
             >
               <option value="All">All Statuses</option>
@@ -232,7 +225,7 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
             <span className="text-slate-500">Category:</span>
             <select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as any)}
+              onChange={(e) => setCategoryFilter(e.target.value as ToolCategory | 'All')}
               className="bg-transparent font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
             >
               <option value="All">All Categories</option>
@@ -250,7 +243,7 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
             <span className="text-slate-500">LOB:</span>
             <select
               value={lobFilter}
-              onChange={(e) => setLobFilter(e.target.value as any)}
+              onChange={(e) => setLobFilter(e.target.value as LOB | 'All')}
               className="bg-transparent font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
             >
               <option value="All">All LOBs</option>
@@ -293,12 +286,8 @@ export const ToolRequestsPage: React.FC<ToolRequestsPageProps> = ({ currentRole 
                     </td>
 
                     <td className="py-3 px-4">
-                      <div className="font-bold text-slate-900 dark:text-white">
-                        {req.toolName}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {req.vendor}
-                      </div>
+                      <div className="font-bold text-slate-900 dark:text-white">{req.toolName}</div>
+                      <div className="text-[11px] text-slate-500">{req.vendor}</div>
                     </td>
 
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-300">

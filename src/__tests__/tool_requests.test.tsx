@@ -111,11 +111,60 @@ describe('AI Tool Intake, Safety Analysis & Certification Suite', () => {
     });
 
     it('loads initial data from localStorage if stored records exist', () => {
+      localStorage.removeItem('upbound_ai_tool_requests_v2');
       localStorage.setItem('upbound_ai_tool_requests_v1', JSON.stringify([INITIAL_TOOL_REQUESTS[0]]));
-      const StoreClass = toolRequestStore.constructor as any;
+      const StoreClass = toolRequestStore.constructor as new () => typeof toolRequestStore;
       const rehydrated = new StoreClass();
       expect(rehydrated.getToolRequests().length).toBe(1);
       localStorage.removeItem('upbound_ai_tool_requests_v1');
+    });
+
+    it('falls back safely from corrupt persistence and returns immutable snapshots', () => {
+      localStorage.setItem('upbound_ai_tool_requests_v1', '{broken');
+      const StoreClass = toolRequestStore.constructor as new () => typeof toolRequestStore;
+      const rehydrated = new StoreClass();
+      expect(rehydrated.getToolRequests()).toHaveLength(7);
+
+      const snapshot = rehydrated.getToolRequests();
+      snapshot[0].toolName = 'Caller mutation';
+      expect(rehydrated.getToolRequests()[0].toolName).not.toBe('Caller mutation');
+      expect(rehydrated.updateToolDecision('missing', 'Approved')).toBe(false);
+    });
+
+    it('rejects persisted records with invalid enums, dates, and nested safety values', () => {
+      const malformed = {
+        ...INITIAL_TOOL_REQUESTS[0],
+        category: 'INVALID',
+        lob: 'INVALID',
+        dataHandlingModel: 'INVALID',
+        requestedDate: 'not-a-date',
+        safetyAnalysis: { ...INITIAL_TOOL_REQUESTS[0].safetyAnalysis, safetyScore: 101 },
+      };
+      localStorage.setItem(
+        'upbound_ai_tool_requests_v2',
+        JSON.stringify({ schemaVersion: 2, requests: [malformed] })
+      );
+      const StoreClass = toolRequestStore.constructor as new () => typeof toolRequestStore;
+      expect(new StoreClass().getToolRequests()).toHaveLength(7);
+      localStorage.removeItem('upbound_ai_tool_requests_v2');
+    });
+
+    it('does not present inferred vendor controls as verified evidence', () => {
+      const created = toolRequestStore.addToolRequest({
+        toolName: 'Claimed Enterprise Tool',
+        vendor: 'Example Vendor',
+        category: 'Research & Search',
+        requesterName: 'Reviewer',
+        requesterRole: 'Analyst',
+        lob: 'Corporate',
+        department: 'Risk',
+        intendedUseCase: 'Research',
+        dataHandlingModel: 'Enterprise Tenant (Zero Retention)',
+        intendedDataSensitivity: ['Internal non-sensitive'],
+      });
+      expect(created.safetyAnalysis.certifications.every((item) => !item.verified)).toBe(true);
+      expect(created.safetyAnalysis.trainsOnCustomerData).toBeNull();
+      expect(created.safetyAnalysis.dataRetentionPolicy).toContain('require evidence');
     });
   });
 
@@ -167,7 +216,9 @@ describe('AI Tool Intake, Safety Analysis & Certification Suite', () => {
 
       expect(screen.getByText('Safety & Certification Score')).toBeInTheDocument();
       expect(screen.getByText('Vendor Compliance & Statutory Certifications')).toBeInTheDocument();
-      expect(screen.getByText('Potential Dangers, Security Vulnerabilities & Risk Vectors')).toBeInTheDocument();
+      expect(
+        screen.getByText('Potential Dangers, Security Vulnerabilities & Risk Vectors')
+      ).toBeInTheDocument();
     });
   });
 
@@ -179,8 +230,12 @@ describe('AI Tool Intake, Safety Analysis & Certification Suite', () => {
       render(<ToolRequestModal onSuccess={onSuccess} onClose={onClose} />);
 
       // Fill in form
-      fireEvent.change(screen.getByPlaceholderText(/e\.g\. Cursor IDE/i), { target: { value: 'Synthesia Studio' } });
-      fireEvent.change(screen.getByPlaceholderText(/e\.g\. Anthropic, OpenAI/i), { target: { value: 'Synthesia Ltd' } });
+      fireEvent.change(screen.getByPlaceholderText(/e\.g\. Cursor IDE/i), {
+        target: { value: 'Synthesia Studio' },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/e\.g\. Anthropic, OpenAI/i), {
+        target: { value: 'Synthesia Ltd' },
+      });
       fireEvent.change(screen.getByPlaceholderText(/Full Name/i), { target: { value: 'Jordan Smith' } });
       fireEvent.change(screen.getByPlaceholderText(/Describe specifically what task/i), {
         target: { value: 'Creating localized store training videos in Spanish and English.' },

@@ -1,5 +1,5 @@
 // src/__tests__/workflow_store.test.ts
-// Justification: Comprehensive unit and integration test suite targeting 100% coverage for the reactive workflow store.
+// Unit and integration coverage for workflow-store invariants and failure modes.
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Justification: Vitest testing assertions, hooks, and spy utilities.
@@ -172,6 +172,29 @@ describe('WorkflowStore Reactive State & Governance Actions', () => {
 
     // Non-existent ID returns false
     expect(workflowStore.updateWorkflowStatus('AIW-9999', 'Approved')).toBe(false);
+  });
+
+  it('keeps snapshots immutable and restores pristine seed records', () => {
+    const snapshot = workflowStore.getAllWorkflows();
+    const original = snapshot.find((workflow) => workflow.id === 'AIW-0008');
+    expect(original).toBeDefined();
+    original!.title = 'Caller mutation';
+    expect(workflowStore.getAllWorkflows().find((workflow) => workflow.id === 'AIW-0008')?.title).not.toBe(
+      'Caller mutation'
+    );
+
+    workflowStore.updateWorkflowStatus('AIW-0008', 'Declined');
+    workflowStore.resetToSeedData();
+    expect(workflowStore.getAllWorkflows().find((workflow) => workflow.id === 'AIW-0008')?.status).toBe(
+      'In review'
+    );
+    expect(workflowStore.updateWorkflowStatus('AIW-0008', 'Approved with conditions', '  ')).toBe(false);
+  });
+
+  it('falls back when stored JSON has the wrong schema', async () => {
+    window.localStorage.setItem('ai_citizen_developer_registry_v1', JSON.stringify([{ id: 123 }]));
+    const { WorkflowStore } = await import('../store/workflow_store.js');
+    expect(new WorkflowStore().getAllWorkflows()).toHaveLength(24);
   });
 
   // =========================================================================

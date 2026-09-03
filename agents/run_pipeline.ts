@@ -3,6 +3,7 @@
 
 import fs from 'fs';
 // Justification: Node fs module to verify physical artifact generation.
+import { runNpm } from './process_runner.js';
 
 import { SuperAgent } from './super_agent.js';
 // Justification: Supervisor class that coordinates execution, validation, and retries.
@@ -34,8 +35,33 @@ import { DeploymentAgent } from './definitions/deployment_agent.js';
 import { AgentTask, AgentExecutionContext, VerificationResult } from './types.js';
 // Justification: Types for task creation and verification.
 
+async function verifyNpm(args: string[]): Promise<{ success: boolean; diagnostics?: string[] }> {
+  try {
+    const result = await runNpm(args, {
+      cwd: process.cwd(),
+      timeoutMs: 15 * 60 * 1000,
+    });
+    return result.exitCode === 0
+      ? { success: true }
+      : { success: false, diagnostics: [(result.stderr || result.stdout).trim()] };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    return { success: false, diagnostics: [detail] };
+  }
+}
+
+async function verifyNpmCommands(
+  commands: string[][]
+): Promise<{ success: boolean; diagnostics?: string[] }> {
+  for (const args of commands) {
+    const result = await verifyNpm(args);
+    if (!result.success) return result;
+  }
+  return { success: true };
+}
+
 async function main() {
-  console.log('Starting Citizen Developer Registry Multi-Agent Orchestration Pipeline...\n');
+  console.log('Starting Citizen Developer Registry role-oriented verification harness...\n');
 
   // Justification: Instantiate the master Super Agent.
   const superAgent = new SuperAgent(process.cwd());
@@ -76,13 +102,21 @@ async function main() {
       verify: async (_ctx: AgentExecutionContext): Promise<VerificationResult> => {
         const typesExists = fs.existsSync('src/types/workflow.ts');
         const engineExists = fs.existsSync('src/engine/risk_engine.ts');
-        const success = typesExists && engineExists;
+        const checks =
+          typesExists && engineExists
+            ? await verifyNpmCommands([
+                ['run', 'check:modules'],
+                ['run', 'typecheck'],
+              ])
+            : { success: false, diagnostics: ['Architecture artifacts are missing.'] };
+        const success = typesExists && engineExists && checks.success;
         return {
           success,
           message: success
-            ? 'Workflow data model and risk engine specifications verified.'
-            : 'Missing types or risk engine implementations.',
-          metrics: { typesExists, engineExists },
+            ? 'Data model, module-size gate, and strict TypeScript checks passed.'
+            : 'Architecture verification failed.',
+          metrics: { typesExists, engineExists, staticChecksPassed: checks.success },
+          diagnostics: checks.diagnostics,
         };
       },
     },
@@ -124,7 +158,8 @@ async function main() {
       id: 'TASK-005',
       title: 'Frontend Component Architecture Implementation',
       assignedRole: 'frontend_developer',
-      instructions: 'Build Header, IntakeWizard, RegistryTable, DetailModal, CoverageDashboard, and KnowledgeCheck.',
+      instructions:
+        'Build Header, IntakeWizard, RegistryTable, DetailModal, CoverageDashboard, and KnowledgeCheck.',
       expectedArtifacts: [
         'src/components/layout/Header.tsx',
         'src/components/intake/IntakeWizard.tsx',
@@ -143,25 +178,37 @@ async function main() {
         const missing = components.filter((c) => !fs.existsSync(c));
         return {
           success: missing.length === 0,
-          message: missing.length === 0 ? 'All 6 primary UI components verified.' : `Missing: ${missing.join(', ')}`,
-          metrics: { totalComponents: components.length, existingComponents: components.length - missing.length },
+          message:
+            missing.length === 0 ? 'All 6 primary UI components verified.' : `Missing: ${missing.join(', ')}`,
+          metrics: {
+            totalComponents: components.length,
+            existingComponents: components.length - missing.length,
+          },
         };
       },
     },
     {
       id: 'TASK-006',
-      title: 'QA 100% Coverage & Mutation Test Verification',
+      title: 'QA Test and Coverage Verification',
       assignedRole: 'qa_engineer',
-      instructions: 'Execute Vitest test suites and verify 100% code coverage threshold.',
+      instructions: 'Execute Vitest and enforce the configured scoped coverage thresholds.',
       expectedArtifacts: ['src/__tests__/risk_engine.test.ts', 'src/__tests__/workflow_store.test.ts'],
       verify: async (_ctx: AgentExecutionContext): Promise<VerificationResult> => {
         const testEngine = fs.existsSync('src/__tests__/risk_engine.test.ts');
         const testStore = fs.existsSync('src/__tests__/workflow_store.test.ts');
-        const success = testEngine && testStore;
+        const testResult =
+          testEngine && testStore
+            ? await verifyNpmCommands([
+                ['run', 'test:coverage'],
+                ['run', 'test:mutation'],
+              ])
+            : { success: false, diagnostics: ['Required test files are missing.'] };
+        const success = testEngine && testStore && testResult.success;
         return {
           success,
-          message: success ? 'Exhaustive unit test suites verified.' : 'Missing unit test suites.',
-          metrics: { testEngine, testStore },
+          message: success ? 'Coverage and mutation quality gates passed.' : 'QA quality gates failed.',
+          metrics: { testEngine, testStore, coverageAndMutationPassed: testResult.success },
+          diagnostics: testResult.diagnostics,
         };
       },
     },
@@ -184,7 +231,8 @@ async function main() {
         const missing = docs.filter((d) => !fs.existsSync(d));
         return {
           success: missing.length === 0,
-          message: missing.length === 0 ? 'All documentation artifacts verified.' : `Missing: ${missing.join(', ')}`,
+          message:
+            missing.length === 0 ? 'All documentation artifacts verified.' : `Missing: ${missing.join(', ')}`,
           metrics: { totalDocs: docs.length, existingDocs: docs.length - missing.length },
         };
       },
@@ -197,10 +245,22 @@ async function main() {
       expectedArtifacts: ['package.json', 'vite.config.ts'],
       verify: async (_ctx: AgentExecutionContext): Promise<VerificationResult> => {
         const pkgExists = fs.existsSync('package.json');
+        const buildResult = pkgExists
+          ? await verifyNpmCommands([
+              ['run', 'build'],
+              ['run', 'check:bundle'],
+              ['run', 'check:smoke'],
+              ['run', 'test:e2e'],
+              ['audit', '--omit=dev', '--audit-level=moderate'],
+            ])
+          : { success: false, diagnostics: ['package.json is missing.'] };
         return {
-          success: pkgExists,
-          message: pkgExists ? 'Deployment packaging and build configuration verified.' : 'Missing package configuration.',
-          metrics: { productionReady: pkgExists },
+          success: pkgExists && buildResult.success,
+          message: buildResult.success
+            ? 'Build, bundle budget, distribution and browser smoke tests, and runtime audit passed.'
+            : 'Production build verification failed.',
+          metrics: { packageFound: pkgExists, deploymentGatesPassed: buildResult.success },
+          diagnostics: buildResult.diagnostics,
         };
       },
     },

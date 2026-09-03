@@ -46,7 +46,9 @@ export function evaluateRiskTier(data: Partial<WorkflowIntakeFormData>): RiskEva
     // Justification: Tier 4 trigger condition per PRD Section 4.
     const reasons: string[] = [];
     if (isCreditDecision && isNotVendorFeature) {
-      reasons.push('influences customer credit/underwriting decisions with a non-vendor custom implementation');
+      reasons.push(
+        'influences customer credit/underwriting decisions with a non-vendor custom implementation'
+      );
     }
     if (touchesCreditData && leavesTenant) {
       reasons.push('transmits sensitive credit or underwriting data outside enterprise tenant boundaries');
@@ -58,7 +60,8 @@ export function evaluateRiskTier(data: Partial<WorkflowIntakeFormData>): RiskEva
       routeTo: 'AI Working Group; presumed declined absent explicit exception',
       reviewCadenceMonths: 3,
       requiresSpecialCallout: true,
-      calloutMessage: 'Regulatory Alert: Credit/underwriting decisioning triggers adverse action explainability obligations under Reg B. Presumed declined.',
+      calloutMessage:
+        'Regulatory Alert: Credit/underwriting decisioning triggers adverse action explainability obligations under Reg B. Presumed declined.',
     };
   }
 
@@ -123,9 +126,7 @@ export function evaluateRiskTier(data: Partial<WorkflowIntakeFormData>): RiskEva
     // Justification: Tier 2 trigger condition per PRD Section 4.
     const reasons: string[] = [];
     if (touchesInternalSensitive) {
-      const matched = categories.filter((c) =>
-        ['Internal confidential', 'Employee data'].includes(c)
-      );
+      const matched = categories.filter((c) => ['Internal confidential', 'Employee data'].includes(c));
       reasons.push(`touches sensitive internal data (${matched.join(', ')})`);
     }
     if (isBroadAudience) {
@@ -150,7 +151,8 @@ export function evaluateRiskTier(data: Partial<WorkflowIntakeFormData>): RiskEva
   // Justification: Default fallback for benign internal workflows without sensitive data or autonomous impact.
   return {
     tier: 'Tier 1 Low',
-    reason: 'Tier 1 — Low. This workflow uses non-sensitive company or public information with limited scope and impact. Auto-approved and logged.',
+    reason:
+      'Tier 1 — Low. This workflow uses non-sensitive company or public information with limited scope and impact. Auto-approved and logged.',
     routeTo: 'Auto-approved, logged',
     reviewCadenceMonths: 12,
     requiresSpecialCallout: false,
@@ -159,6 +161,10 @@ export function evaluateRiskTier(data: Partial<WorkflowIntakeFormData>): RiskEva
 
 // Justification: Helper calculating next reattestation review due date based on derived tier cadence using UTC arithmetic.
 export function calculateReviewDueDate(cadenceMonths: number, fromDate: Date = new Date()): string {
+  if (!Number.isInteger(cadenceMonths) || cadenceMonths < 0) {
+    throw new RangeError('cadenceMonths must be a non-negative integer');
+  }
+
   const year = fromDate.getUTCFullYear();
   // Justification: Extract UTC year to prevent local timezone offsets.
 
@@ -168,8 +174,14 @@ export function calculateReviewDueDate(cadenceMonths: number, fromDate: Date = n
   const day = fromDate.getUTCDate();
   // Justification: Extract UTC day of month.
 
-  const targetDate = new Date(Date.UTC(year, month + cadenceMonths, day));
-  // Justification: Construct target date in UTC adding cadence months.
+  // Construct the first day of the target month, then clamp the original day
+  // to that month's final valid day. Native Date overflow would otherwise turn
+  // January 31 + one month into a date in March.
+  const targetMonthStart = new Date(Date.UTC(year, month + cadenceMonths, 1));
+  const targetYear = targetMonthStart.getUTCFullYear();
+  const targetMonth = targetMonthStart.getUTCMonth();
+  const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+  const targetDate = new Date(Date.UTC(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth)));
 
   return targetDate.toISOString().split('T')[0];
   // Justification: Return standardized ISO 8601 YYYY-MM-DD date string.

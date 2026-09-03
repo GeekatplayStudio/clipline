@@ -125,7 +125,9 @@ describe('Citizen Developer Registry UI Components', () => {
     fireEvent.click(financialCheckbox);
 
     // Verify educational warning appears immediately
-    expect(screen.getByText(/Heads up: customer financial data means this will need security and legal review/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Heads up: customer financial data means this will need security and legal review/i)
+    ).toBeInTheDocument();
 
     // Click Continue to Step 3
     fireEvent.click(screen.getByText('Continue'));

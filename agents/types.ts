@@ -15,12 +15,7 @@ export type AgentRole =
 
 // Justification: Lifecycle status states for agent task tracking and verification telemetry.
 export type TaskStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'verification_failed'
-  | 'retrying'
-  | 'completed'
-  | 'fatal_error';
+  'pending' | 'in_progress' | 'verification_failed' | 'retrying' | 'completed' | 'fatal_error';
 
 // Justification: Defines verification result returned by verification hooks to validate quality gates.
 export interface VerificationResult {

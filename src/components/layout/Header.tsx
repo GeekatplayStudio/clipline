@@ -7,7 +7,19 @@ import React from 'react';
 import { UserRole } from '../../types/workflow.js';
 // Justification: UserRole enum for role switcher state.
 
-import { ShieldCheck, RotateCcw, UserCheck, BookOpen, Layers, PlusCircle, BarChart3, Globe, Download, Award, Cpu } from 'lucide-react';
+import {
+  ShieldCheck,
+  RotateCcw,
+  UserCheck,
+  BookOpen,
+  Layers,
+  PlusCircle,
+  BarChart3,
+  Globe,
+  Download,
+  Award,
+  Cpu,
+} from 'lucide-react';
 // Justification: Lucide icons for clean enterprise visual cues.
 
 export type AppView = 'network3d' | 'dashboard' | 'registry' | 'tools' | 'readiness' | 'register' | 'quiz';
@@ -36,7 +48,8 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-2">
           <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
           <span>
-            <strong>Prototype</strong> — data model exploration. Production implementation would live in ServiceNow.
+            <strong>Prototype</strong> — data model exploration. Production implementation would live in
+            ServiceNow.
           </span>
         </div>
         <div className="hidden sm:flex items-center space-x-4 text-[11px] text-slate-400">
@@ -52,12 +65,8 @@ export const Header: React.FC<HeaderProps> = ({
             <ShieldCheck className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-900 leading-tight">
-              AI Workflow Registry
-            </h1>
-            <p className="text-xs text-slate-500">
-              Enterprise Citizen Developer Governance & Risk Tiering
-            </p>
+            <h1 className="text-base font-bold text-slate-900 leading-tight">AI Workflow Registry</h1>
+            <p className="text-xs text-slate-500">Enterprise Citizen Developer Governance & Risk Tiering</p>
           </div>
         </div>
 
@@ -68,6 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-semibold text-slate-700 whitespace-nowrap">Viewing as:</span>
             <select
               id="role-switcher-select"
+              aria-label="View as role"
               value={currentRole}
               onChange={(e) => onRoleChange(e.target.value as UserRole)}
               className="bg-transparent font-medium text-slate-900 focus:outline-none cursor-pointer"

@@ -8,6 +8,7 @@ import { Workflow, UserRole, WorkflowStatus } from '../../types/workflow.js';
 // Justification: Domain types.
 
 import { workflowStore } from '../../store/workflow_store.js';
+import { useDialog } from '../../hooks/useDialog.js';
 // Justification: Store for state transition persistence.
 
 import {
@@ -41,6 +42,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
   onClose,
   onStatusUpdated,
 }) => {
+  const dialogRef = useDialog(onClose);
   // Justification: Action form state for Program Lead decisions.
   const [conditionsInput, setConditionsInput] = useState<string>(workflow.conditions || '');
   const [showConditionsField, setShowConditionsField] = useState<boolean>(
@@ -81,19 +83,28 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg border border-slate-300 shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col my-auto animate-fadeIn">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="workflow-detail-title"
+        tabIndex={-1}
+        className="bg-white rounded-lg border border-slate-300 shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col my-auto animate-fadeIn"
+      >
         {/* Modal Header */}
         <div className="px-6 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
             <span className="font-mono text-xs font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
               {workflow.id}
             </span>
-            <h2 className="text-sm font-bold text-slate-900 truncate max-w-md">
+            <h2 id="workflow-detail-title" className="text-sm font-bold text-slate-900 truncate max-w-md">
               {workflow.title}
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close workflow details"
             className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200"
           >
             <X className="w-4 h-4" />
@@ -144,18 +155,16 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                       workflow.risk_tier === 'Tier 1 Low'
                         ? 'badge-tier1'
                         : workflow.risk_tier === 'Tier 2 Moderate'
-                        ? 'badge-tier2'
-                        : workflow.risk_tier === 'Tier 3 High'
-                        ? 'badge-tier3'
-                        : 'badge-tier4'
+                          ? 'badge-tier2'
+                          : workflow.risk_tier === 'Tier 3 High'
+                            ? 'badge-tier3'
+                            : 'badge-tier4'
                     }`}
                   >
                     {workflow.risk_tier}
                   </span>
                 </div>
-                <p className="text-slate-800 font-medium leading-relaxed">
-                  {workflow.risk_reason}
-                </p>
+                <p className="text-slate-800 font-medium leading-relaxed">{workflow.risk_reason}</p>
                 {workflow.conditions && (
                   <div className="mt-2 pt-2 border-t border-slate-200 text-amber-900 bg-amber-50 p-2 rounded">
                     <strong>Approval Conditions:</strong> {workflow.conditions}
@@ -190,9 +199,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     <Wrench className="w-3.5 h-3.5 text-slate-500 mt-0.5" />
                     <div>
                       <span className="text-slate-500 block">Tools Used</span>
-                      <span className="font-medium text-slate-900">
-                        {workflow.tools_used.join(', ')}
-                      </span>
+                      <span className="font-medium text-slate-900">{workflow.tools_used.join(', ')}</span>
                     </div>
                   </div>
 
@@ -200,9 +207,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     <FileText className="w-3.5 h-3.5 text-slate-500 mt-0.5" />
                     <div>
                       <span className="text-slate-500 block">Build Architecture</span>
-                      <span className="font-medium text-slate-900">
-                        {workflow.build_type}
-                      </span>
+                      <span className="font-medium text-slate-900">{workflow.build_type}</span>
                     </div>
                   </div>
                 </div>
@@ -222,9 +227,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     <Eye className="w-3.5 h-3.5 text-slate-500 mt-0.5" />
                     <div>
                       <span className="text-slate-500 block">Decision Influence</span>
-                      <span className="font-medium text-slate-900">
-                        {workflow.decision_influence}
-                      </span>
+                      <span className="font-medium text-slate-900">{workflow.decision_influence}</span>
                     </div>
                   </div>
 
@@ -232,9 +235,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     <Clock className="w-3.5 h-3.5 text-slate-500 mt-0.5" />
                     <div>
                       <span className="text-slate-500 block">Review Due Date</span>
-                      <span className="font-mono font-medium text-slate-900">
-                        {workflow.review_due}
-                      </span>
+                      <span className="font-mono font-medium text-slate-900">{workflow.review_due}</span>
                     </div>
                   </div>
 
@@ -253,9 +254,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
 
               {/* Description Block */}
               <div>
-                <span className="font-semibold text-slate-700 block mb-1">
-                  Builder Description
-                </span>
+                <span className="font-semibold text-slate-700 block mb-1">Builder Description</span>
                 <p className="bg-slate-50 border border-slate-200 rounded p-3 text-slate-700 leading-relaxed">
                   {workflow.description}
                 </p>
@@ -275,10 +274,14 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
 
                   {showConditionsField && (
                     <div>
-                      <label className="block text-slate-700 font-semibold mb-1">
+                      <label
+                        htmlFor="workflow-approval-conditions"
+                        className="block text-slate-700 font-semibold mb-1"
+                      >
                         Stipulated Approval Conditions:
                       </label>
                       <input
+                        id="workflow-approval-conditions"
                         type="text"
                         value={conditionsInput}
                         onChange={(e) => setConditionsInput(e.target.value)}
@@ -290,6 +293,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
 
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     <button
+                      type="button"
                       onClick={() => handleAction('Approved')}
                       className="px-3 py-1.5 bg-emerald-700 text-white rounded font-semibold hover:bg-emerald-800 flex items-center space-x-1"
                     >
@@ -298,7 +302,9 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => handleAction('Approved with conditions')}
+                      disabled={showConditionsField && !conditionsInput.trim()}
                       className="px-3 py-1.5 bg-amber-600 text-white rounded font-semibold hover:bg-amber-700 flex items-center space-x-1"
                     >
                       <AlertTriangle className="w-3.5 h-3.5" />
@@ -306,6 +312,7 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => handleAction('Declined')}
                       className="px-3 py-1.5 bg-rose-700 text-white rounded font-semibold hover:bg-rose-800 flex items-center space-x-1"
                     >
@@ -325,7 +332,8 @@ export const WorkflowDetailModal: React.FC<WorkflowDetailModalProps> = ({
                   <span>AI Standards Lead Consultation Channel</span>
                 </div>
                 <p className="text-xs text-sky-800 mt-1">
-                  "You are the resource they come to when they have a question." The registry doubles as the enterprise advisory channel for citizen developers.
+                  "You are the resource they come to when they have a question." The registry doubles as the
+                  enterprise advisory channel for citizen developers.
                 </p>
               </div>
 

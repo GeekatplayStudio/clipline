@@ -31,11 +31,7 @@ You author authoritative, actionable documentation that bridges prototype code t
     // Justification: Store documentation status in shared memory.
     context.sharedMemory.set('doc_status', {
       timestamp: new Date().toISOString(),
-      documents: [
-        'docs/ARCHITECTURE.md',
-        'docs/SERVICENOW_MIGRATION_BLUEPRINT.md',
-        'docs/DEMO_SCRIPT.md',
-      ],
+      documents: ['docs/ARCHITECTURE.md', 'docs/SERVICENOW_MIGRATION_BLUEPRINT.md', 'docs/DEMO_SCRIPT.md'],
       justificationsComplete: true,
     });
   }

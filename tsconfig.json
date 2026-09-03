@@ -37,6 +37,6 @@
     }
   },
   // Justification: Include all source files, agent orchestration files, and test files.
-  "include": ["src", "agents", "tests", "vite.config.ts"],
+  "include": ["src", "agents", "scripts", "tests", "vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

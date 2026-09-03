@@ -2,8 +2,17 @@
 // Justification: Floating 3D HUD glassmorphic card presenting real-time telemetry of hovered organizational and citizen developer nodes.
 
 import React from 'react';
-import { Workflow, RiskTier } from '../../types/workflow.js';
-import { ShieldAlert, AlertTriangle, CheckCircle2, User, Building2, Layers, Calendar, ExternalLink } from 'lucide-react';
+import { LineOfBusiness, Workflow, RiskTier } from '../../types/workflow.js';
+import {
+  ShieldAlert,
+  AlertTriangle,
+  CheckCircle2,
+  User,
+  Building2,
+  Layers,
+  Calendar,
+  ExternalLink,
+} from 'lucide-react';
 
 export function getTierNumber(tier: RiskTier): 1 | 2 | 3 | 4 {
   if (tier === 'Tier 4 Prohibited') return 4;
@@ -16,7 +25,7 @@ export interface GraphNodeData {
   id: string;
   name: string;
   type: 'enterprise' | 'lob' | 'department' | 'employee';
-  lob?: string;
+  lob?: LineOfBusiness;
   department?: string;
   manager?: string;
   workflow?: Workflow;
@@ -33,11 +42,7 @@ interface NodeDetailOverlayProps {
   onSelectWorkflow?: (workflow: Workflow) => void;
 }
 
-export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
-  node,
-  position,
-  onSelectWorkflow,
-}) => {
+export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({ node, position, onSelectWorkflow }) => {
   if (!node || !position) return null;
 
   // Determine risk badge styling
@@ -107,11 +112,15 @@ export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
         <div className="flex items-start justify-between gap-2 pb-2 mb-2 border-b border-slate-800">
           <div>
             <div className="text-xs uppercase tracking-wider text-slate-400 font-medium">
-              {node.type === 'employee' ? 'Citizen Developer' : node.type === 'department' ? 'Department Hub' : node.type === 'lob' ? 'Business Division' : 'Enterprise Hub'}
+              {node.type === 'employee'
+                ? 'Citizen Developer'
+                : node.type === 'department'
+                  ? 'Department Hub'
+                  : node.type === 'lob'
+                    ? 'Business Division'
+                    : 'Enterprise Hub'}
             </div>
-            <h4 className="text-base font-bold text-white tracking-tight leading-tight">
-              {node.name}
-            </h4>
+            <h4 className="text-base font-bold text-white tracking-tight leading-tight">{node.name}</h4>
           </div>
           {getBadge()}
         </div>
@@ -132,9 +141,7 @@ export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
             </div>
 
             <div className="bg-slate-800/80 rounded-lg p-2.5 mt-2 border border-slate-700/60">
-              <div className="font-semibold text-white mb-1 line-clamp-1">
-                {node.workflow.title}
-              </div>
+              <div className="font-semibold text-white mb-1 line-clamp-1">{node.workflow.title}</div>
               <p className="text-slate-400 line-clamp-2 text-[11px] leading-relaxed mb-2">
                 {node.workflow.description}
               </p>
@@ -144,7 +151,13 @@ export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
                   <Calendar className="w-3 h-3 text-slate-400" />
                   Due: {node.workflow.review_due}
                 </span>
-                <span className={node.workflow.training_current ? 'text-emerald-400 font-medium' : 'text-rose-400 font-medium'}>
+                <span
+                  className={
+                    node.workflow.training_current
+                      ? 'text-emerald-400 font-medium'
+                      : 'text-rose-400 font-medium'
+                  }
+                >
                   {node.workflow.training_current ? '✓ Training Active' : '⚠ Training Lapsed'}
                 </span>
               </div>
@@ -171,9 +184,7 @@ export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
             </div>
             <div className="flex items-center justify-between py-1 border-b border-slate-800">
               <span className="text-slate-400">Divisional Tier Exposure:</span>
-              <span className="font-semibold text-amber-400">
-                {(node.avgRisk ?? 1.5).toFixed(1)} / 4.0
-              </span>
+              <span className="font-semibold text-amber-400">{(node.avgRisk ?? 1.5).toFixed(1)} / 4.0</span>
             </div>
             <p className="text-[11px] text-slate-400 italic pt-1">
               Click node in 3D canvas to isolate and filter this division's workflows.
@@ -184,7 +195,8 @@ export const NodeDetailOverlay: React.FC<NodeDetailOverlayProps> = ({
         {node.type === 'enterprise' && (
           <div className="text-xs text-slate-300 space-y-1.5">
             <p className="text-[11px] text-slate-300 leading-relaxed">
-              Upbound Group Enterprise AI Governance Core connecting all 5 operating divisions, departments, and citizen developers.
+              Upbound Group Enterprise AI Governance Core connecting all 5 operating divisions, departments,
+              and citizen developers.
             </p>
             <div className="pt-1 text-[11px] text-blue-400 font-medium">
               Rotate, drag, and zoom to explore organizational compliance topology.

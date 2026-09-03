@@ -2,6 +2,7 @@
 // Justification: Interactive modal form for employees to request new AI tools with live compliance advisories.
 
 import React, { useState } from 'react';
+import { useDialog } from '../../hooks/useDialog';
 import { toolRequestStore } from '../../store/tool_request_store.js';
 import { ToolCategory, DataHandlingModel } from '../../types/tool_request.js';
 import { LOB } from '../../types/workflow.js';
@@ -40,10 +41,8 @@ const DATA_CATEGORIES_OPTIONS = [
   'Credit or underwriting data (Scores, approval rules)',
 ];
 
-export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
-  onClose,
-  onSuccess,
-}) => {
+export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({ onClose, onSuccess }) => {
+  const dialogRef = useDialog(onClose);
   const [toolName, setToolName] = useState('');
   const [vendor, setVendor] = useState('');
   const [category, setCategory] = useState<ToolCategory>('Research & Search');
@@ -66,8 +65,8 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
     );
   };
 
-  const touchesCredit = selectedSensitivities.some((s) =>
-    s.toLowerCase().includes('credit') || s.toLowerCase().includes('underwriting')
+  const touchesCredit = selectedSensitivities.some(
+    (s) => s.toLowerCase().includes('credit') || s.toLowerCase().includes('underwriting')
   );
   const touchesPII = selectedSensitivities.some(
     (s) => s.toLowerCase().includes('pii') || s.toLowerCase().includes('financial')
@@ -100,7 +99,14 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tool-request-title"
+        tabIndex={-1}
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -108,7 +114,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
               <Sparkles className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 id="tool-request-title" className="text-base font-bold text-slate-900 dark:text-white">
                 Request New Enterprise AI Tool
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -119,6 +125,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close tool request form"
             className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -166,9 +173,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Tool Category
-              </label>
+              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tool Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ToolCategory)}
@@ -217,9 +222,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
             </div>
 
             <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Role / Title
-              </label>
+              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Role / Title</label>
               <input
                 type="text"
                 placeholder="e.g. Lead Analyst"
@@ -247,9 +250,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
             </div>
 
             <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Department
-              </label>
+              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Department</label>
               <input
                 type="text"
                 placeholder="e.g. Underwriting"
@@ -295,9 +296,7 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
                   >
                     <div
                       className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${
-                        isSelected
-                          ? 'bg-blue-600 border-blue-600 text-white'
-                          : 'border-slate-400'
+                        isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-400'
                       }`}
                     >
                       {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
@@ -321,8 +320,8 @@ export const ToolRequestModal: React.FC<ToolRequestModalProps> = ({
                   {touchesCredit
                     ? '⚠️ Credit & Underwriting Data is strictly regulated under CFPB Regulation B. Using non-enterprise AI models for underwriting will trigger immediate Tier 4 escalation.'
                     : touchesPII
-                    ? '⚠️ Customer PII & Financial Data requires an active Zero Data Retention (ZDR) Enterprise Agreement with verified SOC 2 Type II audit before ingestion.'
-                    : '⚠️ Public/Consumer cloud tools often log user prompts to retrain general foundation models. Consider Enterprise Tenant tier.'}
+                      ? '⚠️ Customer PII & Financial Data requires an active Zero Data Retention (ZDR) Enterprise Agreement with verified SOC 2 Type II audit before ingestion.'
+                      : '⚠️ Public/Consumer cloud tools often log user prompts to retrain general foundation models. Consider Enterprise Tenant tier.'}
                 </p>
               </div>
             </div>

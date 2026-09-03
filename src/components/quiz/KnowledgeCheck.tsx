@@ -7,15 +7,7 @@ import React, { useState } from 'react';
 import { QUIZ_QUESTIONS, QuizQuestion } from '../../data/quiz_questions.js';
 // Justification: Scenario questions and pedagogical explanations.
 
-import {
-  BookOpen,
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
-  RotateCcw,
-  Award,
-  HelpCircle,
-} from 'lucide-react';
+import { BookOpen, CheckCircle2, XCircle, ArrowRight, RotateCcw, Award, HelpCircle } from 'lucide-react';
 // Justification: Icons for enterprise visual clarity.
 
 interface KnowledgeCheckProps {
@@ -82,9 +74,7 @@ export const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onComplete }) =>
         <div className="flex items-center space-x-2">
           <BookOpen className="w-5 h-5 text-slate-800" />
           <div>
-            <h2 className="text-sm font-bold text-slate-900">
-              Acceptable Use Knowledge Check
-            </h2>
+            <h2 className="text-sm font-bold text-slate-900">Acceptable Use Knowledge Check</h2>
             <p className="text-xs text-slate-500">
               Situational Scenarios: Applying AI Policy in Daily Practice
             </p>
@@ -199,9 +189,7 @@ export const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onComplete }) =>
                     </>
                   )}
                 </div>
-                <p className="leading-relaxed">
-                  {currentQuestion.options[selectedOption].explanation}
-                </p>
+                <p className="leading-relaxed">{currentQuestion.options[selectedOption].explanation}</p>
                 <div className="pt-2 border-t border-slate-200/60 font-semibold text-[11px] text-slate-800">
                   Key Principle: {currentQuestion.keyTakeaway}
                 </div>
@@ -242,9 +230,7 @@ export const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onComplete }) =>
               <Award className="w-6 h-6 text-amber-500" />
             </div>
 
-            <h3 className="text-base font-bold text-slate-900">
-              Acceptable Use Knowledge Check Complete
-            </h3>
+            <h3 className="text-base font-bold text-slate-900">Acceptable Use Knowledge Check Complete</h3>
 
             <div className="text-2xl font-extrabold font-mono text-slate-900">
               {score} / {QUIZ_QUESTIONS.length} Scenarios Mastered
@@ -262,13 +248,16 @@ export const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onComplete }) =>
               </span>
               <ul className="list-disc pl-4 space-y-1 text-slate-700">
                 <li>
-                  <strong>Tool approval is not data approval.</strong> An enterprise license does not permit uploading unredacted customer banking or credit data.
+                  <strong>Tool approval is not data approval.</strong> An enterprise license does not permit
+                  uploading unredacted customer banking or credit data.
                 </li>
                 <li>
-                  <strong>Risk tier is derived, not self-selected.</strong> Answer what the workflow touches; let the system classify the compliance controls.
+                  <strong>Risk tier is derived, not self-selected.</strong> Answer what the workflow touches;
+                  let the system classify the compliance controls.
                 </li>
                 <li>
-                  <strong>Customer-affecting decisions require governance.</strong> Workflows with zero human review touching billing or servicing trigger high-tier review.
+                  <strong>Customer-affecting decisions require governance.</strong> Workflows with zero human
+                  review touching billing or servicing trigger high-tier review.
                 </li>
               </ul>
             </div>
