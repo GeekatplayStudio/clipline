@@ -23,9 +23,12 @@ export const OverlayHelpHUD: React.FC = () => {
       return;
     }
 
+    let currentMatchedElement: HTMLElement | null = null;
+
     const handleMouseOver = (e: MouseEvent) => {
       let target = e.target as HTMLElement | null;
       let matchedTerm: GlossaryTerm | null = null;
+      let matchedElement: HTMLElement | null = null;
 
       // Traverse up to 3 parent levels to find matching term or data attributes
       let depth = 0;
@@ -36,16 +39,18 @@ export const OverlayHelpHUD: React.FC = () => {
           const found = HELP_GLOSSARY.find((g) => g.id === explicitId);
           if (found) {
             matchedTerm = found;
+            matchedElement = target;
             break;
           }
         }
 
-        // 2. Search element text or label
-        const textContent = target.innerText || target.textContent || '';
+        // 2. Search element text or label (avoid large blocks)
+        const textContent = (target.innerText || target.textContent || '').trim();
         if (textContent.length > 0 && textContent.length < 80) {
           const found = findGlossaryTerm(textContent);
           if (found) {
             matchedTerm = found;
+            matchedElement = target;
             break;
           }
         }
@@ -56,6 +61,7 @@ export const OverlayHelpHUD: React.FC = () => {
           const found = findGlossaryTerm(ariaOrTitle);
           if (found) {
             matchedTerm = found;
+            matchedElement = target;
             break;
           }
         }
@@ -64,7 +70,8 @@ export const OverlayHelpHUD: React.FC = () => {
         depth++;
       }
 
-      if (matchedTerm) {
+      if (matchedTerm && matchedElement) {
+        currentMatchedElement = matchedElement;
         setActiveTerm(matchedTerm);
 
         // Position HUD safely within viewport
@@ -86,12 +93,36 @@ export const OverlayHelpHUD: React.FC = () => {
           x: Math.max(padding, posX),
           y: Math.max(padding, posY),
         });
+      } else {
+        // User moved mouse onto background or non-matching element: dismiss HUD immediately
+        currentMatchedElement = null;
+        setActiveTerm(null);
+      }
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      // If mouse left the window entirely
+      if (!e.relatedTarget) {
+        currentMatchedElement = null;
+        setActiveTerm(null);
+        return;
+      }
+
+      // If mouse moved out of the currently inspected element
+      if (currentMatchedElement) {
+        const nextTarget = e.relatedTarget as Node | null;
+        if (!nextTarget || !currentMatchedElement.contains(nextTarget)) {
+          currentMatchedElement = null;
+          setActiveTerm(null);
+        }
       }
     };
 
     window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mouseout', handleMouseOut);
     return () => {
       window.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('mouseout', handleMouseOut);
     };
   }, [config.overlayHelpEnabled]);
 

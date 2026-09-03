@@ -200,6 +200,28 @@ describe('System Configurations, Theme Switching & Overlay Help Suite', () => {
 
       expect(screen.getByText('Governance Tier')).toBeInTheDocument();
       expect(screen.getByText(/Any workflow that attempts autonomous credit underwriting/i)).toBeInTheDocument();
+
+      // Mouse out of the button to background
+      fireEvent.mouseOut(btn, { relatedTarget: document.body });
+      expect(screen.queryByText('Governance Tier')).toBeNull();
+    });
+
+    it('dismisses floating HUD card when mouse leaves window', () => {
+      configStore.setOverlayHelp(true);
+      render(
+        <div>
+          <span data-help-id="lob">Test LOB</span>
+          <OverlayHelpHUD />
+        </div>
+      );
+
+      const target = screen.getByText('Test LOB');
+      fireEvent.mouseOver(target);
+      expect(screen.getByText('LOB (Line of Business)')).toBeInTheDocument();
+
+      // Mouse leaves window entirely
+      fireEvent.mouseOut(window, { relatedTarget: null });
+      expect(screen.queryByText('LOB (Line of Business)')).toBeNull();
     });
   });
 
